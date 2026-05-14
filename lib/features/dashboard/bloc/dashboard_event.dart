@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import '../../../data/models/folder_model.dart';
-import '../../../data/models/contact_model.dart';
 
 abstract class DashboardEvent extends Equatable {
   @override

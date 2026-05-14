@@ -8,6 +8,7 @@ import 'bloc/dashboard_bloc.dart';
 import 'bloc/dashboard_event.dart';
 import 'bloc/dashboard_state.dart';
 import '../scanner/scanner_screen.dart';
+import '../folders/folder_detail_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -156,8 +157,15 @@ class DashboardScreen extends StatelessWidget {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   final folder = state.folders[index];
-                  return GlassCard(
-                    padding: const EdgeInsets.all(16),
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => FolderDetailScreen(folder: folder)),
+                      );
+                    },
+                    child: GlassCard(
+                      padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
