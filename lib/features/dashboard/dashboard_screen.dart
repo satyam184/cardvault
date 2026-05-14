@@ -56,10 +56,7 @@ class DashboardScreen extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Hello,',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                Text('Hello,', style: Theme.of(context).textTheme.bodyMedium),
                 Text(
                   'CardVault',
                   style: Theme.of(context).textTheme.displayLarge,
@@ -91,9 +88,23 @@ class DashboardScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatItem(context, total.toString(), 'Total Cards', LucideIcons.creditCard),
-                  VerticalDivider(color: Colors.white10, indent: 20, endIndent: 20),
-                  _buildStatItem(context, '12', 'New Today', LucideIcons.trendingUp),
+                  _buildStatItem(
+                    context,
+                    total.toString(),
+                    'Total Cards',
+                    LucideIcons.creditCard,
+                  ),
+                  VerticalDivider(
+                    color: Colors.white10,
+                    indent: 20,
+                    endIndent: 20,
+                  ),
+                  _buildStatItem(
+                    context,
+                    '12',
+                    'New Today',
+                    LucideIcons.trendingUp,
+                  ),
                 ],
               ),
             ).animate().fadeIn(delay: 200.ms).scaleXY(begin: 0.95);
@@ -103,7 +114,12 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(BuildContext context, String value, String label, IconData icon) {
+  Widget _buildStatItem(
+    BuildContext context,
+    String value,
+    String label,
+    IconData icon,
+  ) {
     return Row(
       children: [
         Icon(icon, color: AppColors.primary, size: 24),
@@ -130,7 +146,10 @@ class DashboardScreen extends StatelessWidget {
             Text('My Folders', style: Theme.of(context).textTheme.titleLarge),
             TextButton(
               onPressed: () {},
-              child: const Text('See All', style: TextStyle(color: AppColors.primary)),
+              child: const Text(
+                'See All',
+                style: TextStyle(color: AppColors.primary),
+              ),
             ),
           ],
         ),
@@ -142,7 +161,9 @@ class DashboardScreen extends StatelessWidget {
     return BlocBuilder<DashboardBloc, DashboardState>(
       builder: (context, state) {
         if (state is DashboardLoading) {
-          return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
+          return const SliverFillRemaining(
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
         if (state is DashboardLoaded) {
           return SliverPadding(
@@ -154,39 +175,51 @@ class DashboardScreen extends StatelessWidget {
                 crossAxisSpacing: 15,
                 childAspectRatio: 1.1,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final folder = state.folders[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => FolderDetailScreen(folder: folder)),
-                      );
-                    },
-                    child: GlassCard(
-                      padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(LucideIcons.folder, color: AppColors.primary, size: 30),
-                        const Spacer(),
-                        Text(
-                          folder.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          '${folder.contactCount} Contacts',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ).animate().fadeIn(delay: (index * 100).ms).slideY(begin: 0.1);
-                },
-                childCount: state.folders.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final folder = state.folders[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            FolderDetailScreen(folder: folder),
+                      ),
+                    );
+                  },
+                  child:
+                      GlassCard(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  LucideIcons.folder,
+                                  color: AppColors.primary,
+                                  size: 30,
+                                ),
+                                const Spacer(),
+                                Text(
+                                  folder.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  '${folder.contactCount} Contacts',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ],
+                            ),
+                          )
+                          .animate()
+                          .fadeIn(delay: (index * 100).ms)
+                          .slideY(begin: 0.1),
+                );
+              }, childCount: state.folders.length),
             ),
           );
         }
