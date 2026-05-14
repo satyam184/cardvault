@@ -1,16 +1,25 @@
-# cardvault
+# CardVault
 
-A new Flutter project.
+A premium business card scanner built with Flutter, featuring on-device OCR and AI-powered parsing.
+
+## Features
+- **Dual-Side Scanning**: Capture both front and back of business cards.
+- **On-Device OCR**: Fast, private text recognition using Google ML Kit.
+- **AI Extraction**: Instant JSON parsing via Groq (Llama 3.3 70B).
+- **Organization**: Categorize cards into custom folders.
+- **Excel Export**: Download your contact collections as professional Excel files.
+
+## Tech Stack
+- **Flutter**: Cross-platform mobile framework.
+- **BLoC**: State management.
+- **Groq SDK**: High-speed AI inference.
+- **ML Kit**: Google's machine learning SDK for mobile.
+- **Excel**: Professional document generation.
+
+## Documentation
+- [Backend Specification](BACKEND_SPECIFICATION.md): Detailed guide for building the Supabase infrastructure.
 
 ## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Run `flutter pub get`.
+2. Create a `.env` file in the root and add `GROQ_API_KEY=your_key_here`.
+3. Run the app using `flutter run`.
