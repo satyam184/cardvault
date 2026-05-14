@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import '../../data/repositories/contact_repository.dart';
 import 'ocr_service.dart';
 import 'ai_service.dart';
 import 'excel_service.dart';
@@ -11,6 +12,7 @@ Future<void> init() async {
   // Data sources
   
   // Repositories
+  sl.registerLazySingleton<ContactRepository>(() => ContactRepository());
   
   // Services
   sl.registerLazySingleton(() => OCRService());

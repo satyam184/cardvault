@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../data/models/contact_model.dart';
+import '../../data/models/folder_model.dart';
+import '../../data/repositories/contact_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/common_widgets/glass_card.dart';
+import '../../core/utils/injection.dart';
 
 class ResultScreen extends StatefulWidget {
   final BusinessContact contact;
@@ -17,11 +20,17 @@ class ResultScreen extends StatefulWidget {
 
 class _ResultScreenState extends State<ResultScreen> {
   late TextEditingModel _model;
+  String? _selectedFolderId;
+  List<ContactFolder> _folders = [];
 
   @override
   void initState() {
     super.initState();
     _model = TextEditingModel(widget.contact);
+    _folders = sl<ContactRepository>().folders;
+    if (_folders.isNotEmpty) {
+      _selectedFolderId = _folders.first.id;
+    }
   }
 
   @override
@@ -31,10 +40,7 @@ class _ResultScreenState extends State<ResultScreen> {
         title: const Text('Review Details'),
         actions: [
           TextButton(
-            onPressed: () {
-              // Save contact and return
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
+            onPressed: _saveContact,
             child: const Text('Save', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
           ),
         ],
@@ -46,10 +52,67 @@ class _ResultScreenState extends State<ResultScreen> {
           children: [
             _buildImagePreview(),
             const SizedBox(height: 30),
+            Text('Save to Folder', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 10),
+            _buildFolderDropdown(),
+            const SizedBox(height: 30),
             Text('Extracted Information', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 15),
             _buildForm(),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _saveContact() {
+    if (_selectedFolderId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select or create a folder first')),
+      );
+      return;
+    }
+
+    final updatedContact = BusinessContact(
+      id: widget.contact.id,
+      name: _model.name.text,
+      company: _model.company.text,
+      jobTitle: _model.jobTitle.text,
+      email: _model.email.text,
+      phone: _model.phone.text,
+      website: _model.website.text,
+      address: _model.address.text,
+      folderId: _selectedFolderId!,
+      frontImagePath: widget.contact.frontImagePath,
+      backImagePath: widget.contact.backImagePath,
+      createdAt: widget.contact.createdAt,
+    );
+
+    sl<ContactRepository>().saveContact(updatedContact, _selectedFolderId!);
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Contact saved successfully!'), backgroundColor: AppColors.secondary),
+    );
+    
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
+  Widget _buildFolderDropdown() {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      borderRadius: 15,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedFolderId,
+          isExpanded: true,
+          dropdownColor: AppColors.surface,
+          icon: const Icon(LucideIcons.chevronDown, color: AppColors.primary),
+          items: _folders.map((f) => DropdownMenuItem(
+            value: f.id,
+            child: Text(f.name, style: const TextStyle(color: Colors.white)),
+          )).toList(),
+          onChanged: (val) => setState(() => _selectedFolderId = val),
+          hint: const Text('Select Folder', style: TextStyle(color: AppColors.textSecondary)),
         ),
       ),
     );

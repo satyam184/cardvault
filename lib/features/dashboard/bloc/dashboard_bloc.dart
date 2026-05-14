@@ -1,46 +1,31 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dashboard_event.dart';
 import 'dashboard_state.dart';
-import '../../../data/models/folder_model.dart';
+import '../../../data/repositories/contact_repository.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
-  DashboardBloc() : super(DashboardInitial()) {
+  final ContactRepository _repository;
+
+  DashboardBloc({required ContactRepository repository}) 
+      : _repository = repository,
+        super(DashboardInitial()) {
     on<LoadDashboard>((event, emit) async {
       emit(DashboardLoading());
-      
-      // Mock Data
-      await Future.delayed(const Duration(seconds: 1));
-      
-      final mockFolders = [
-        ContactFolder(
-          id: '1',
-          name: 'Delhi Conference 2026',
-          createdAt: DateTime.now(),
-          contactCount: 12,
-        ),
-        ContactFolder(
-          id: '2',
-          name: 'Mumbai Expo',
-          createdAt: DateTime.now(),
-          contactCount: 5,
-        ),
-        ContactFolder(
-          id: '3',
-          name: 'Client Meetings',
-          createdAt: DateTime.now(),
-          contactCount: 28,
-        ),
-      ];
-
-      emit(DashboardLoaded(
-        folders: mockFolders,
-        recentContacts: const [], // Empty for now
-        totalCards: 45,
-      ));
+      await Future.delayed(const Duration(milliseconds: 300));
+      _emitLoaded(emit);
     });
 
-    on<CreateFolder>((event, emit) async {
-      // Logic for creating folder (would update state or call repo)
+    on<CreateFolder>((event, emit) {
+      _repository.addFolder(event.name);
+      _emitLoaded(emit);
     });
+  }
+
+  void _emitLoaded(Emitter<DashboardState> emit) {
+    final folders = _repository.folders;
+    emit(DashboardLoaded(
+      folders: folders,
+      totalCards: folders.fold(0, (sum, f) => sum + f.contactCount),
+    ));
   }
 }

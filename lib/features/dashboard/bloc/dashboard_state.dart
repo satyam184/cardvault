@@ -18,7 +18,7 @@ class DashboardLoaded extends DashboardState {
 
   DashboardLoaded({
     required this.folders,
-    required this.recentContacts,
+    this.recentContacts = const [],
     required this.totalCards,
   });
 

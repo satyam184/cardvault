@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import '../../core/theme/app_colors.dart';
+
 import '../../core/common_widgets/glass_card.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/utils/injection.dart';
+import '../../data/repositories/contact_repository.dart';
+import '../folders/folder_detail_screen.dart';
+import '../scanner/scanner_screen.dart';
 import 'bloc/dashboard_bloc.dart';
 import 'bloc/dashboard_event.dart';
 import 'bloc/dashboard_state.dart';
-import '../scanner/scanner_screen.dart';
-import '../folders/folder_detail_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -16,16 +19,19 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => DashboardBloc()..add(LoadDashboard()),
+      create: (context) =>
+          DashboardBloc(repository: sl<ContactRepository>())
+            ..add(LoadDashboard()),
       child: Scaffold(
         body: Container(
           decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment.topLeft,
-              radius: 1.5,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
               colors: [
-                AppColors.primary.withOpacity(0.1),
                 AppColors.background,
+                AppColors.background.withOpacity(0.8),
+                AppColors.primary.withOpacity(0.05),
               ],
             ),
           ),
@@ -36,20 +42,19 @@ class DashboardScreen extends StatelessWidget {
                 _buildStats(context),
                 _buildFolderHeader(context),
                 _buildFolderGrid(context),
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
               ],
             ),
           ),
         ),
-        floatingActionButton: _buildFab(context),
+        floatingActionButton: _buildFAB(context),
       ),
     );
   }
 
   Widget _buildAppBar(BuildContext context) {
-    return SliverPadding(
-      padding: const EdgeInsets.all(20),
-      sliver: SliverToBoxAdapter(
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -63,28 +68,25 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ],
             ),
-            GlassCard(
-              width: 50,
-              height: 50,
-              borderRadius: 15,
-              padding: EdgeInsets.zero,
-              child: const Icon(LucideIcons.user, color: Colors.white),
+            IconButton(
+              icon: const Icon(LucideIcons.bell, color: Colors.white70),
+              onPressed: () {},
             ),
           ],
-        ).animate().fadeIn(duration: 600.ms).slideX(begin: -0.1),
+        ),
       ),
     );
   }
 
   Widget _buildStats(BuildContext context) {
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      sliver: SliverToBoxAdapter(
-        child: BlocBuilder<DashboardBloc, DashboardState>(
-          builder: (context, state) {
-            final total = state is DashboardLoaded ? state.totalCards : 0;
-            return GlassCard(
-              height: 100,
+    return SliverToBoxAdapter(
+      child: BlocBuilder<DashboardBloc, DashboardState>(
+        builder: (context, state) {
+          final total = state is DashboardLoaded ? state.totalCards : 0;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: GlassCard(
+              padding: const EdgeInsets.all(20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -101,15 +103,15 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   _buildStatItem(
                     context,
-                    '12',
-                    'New Today',
+                    'Today',
+                    'Scan more',
                     LucideIcons.trendingUp,
                   ),
                 ],
               ),
-            ).animate().fadeIn(delay: 200.ms).scaleXY(begin: 0.95);
-          },
-        ),
+            ).animate().fadeIn(delay: 200.ms).scaleXY(begin: 0.95),
+          );
+        },
       ),
     );
   }
@@ -125,11 +127,19 @@ class DashboardScreen extends StatelessWidget {
         Icon(icon, color: AppColors.primary, size: 24),
         const SizedBox(width: 12),
         Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(value, style: Theme.of(context).textTheme.headlineMedium),
-            Text(label, style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
           ],
         ),
       ],
@@ -137,18 +147,20 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildFolderHeader(BuildContext context) {
-    return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(20, 30, 20, 15),
-      sliver: SliverToBoxAdapter(
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 30, 20, 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('My Folders', style: Theme.of(context).textTheme.titleLarge),
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                'See All',
-                style: TextStyle(color: AppColors.primary),
+            Builder(
+              builder: (innerContext) => IconButton(
+                icon: const Icon(
+                  LucideIcons.plusCircle,
+                  color: AppColors.primary,
+                ),
+                onPressed: () => _showCreateFolderDialog(innerContext),
               ),
             ),
           ],
@@ -209,7 +221,7 @@ class DashboardScreen extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
-                                  '${folder.contactCount} Contacts',
+                                  '${folder.contactCount} Cards',
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ],
@@ -228,7 +240,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFab(BuildContext context) {
+  Widget _buildFAB(BuildContext context) {
     return FloatingActionButton.extended(
       onPressed: () {
         Navigator.push(
@@ -236,8 +248,43 @@ class DashboardScreen extends StatelessWidget {
           MaterialPageRoute(builder: (context) => const ScannerScreen()),
         );
       },
+      backgroundColor: AppColors.primary,
       label: const Text('Scan Card'),
       icon: const Icon(LucideIcons.scan),
     ).animate().scaleXY(delay: 500.ms, begin: 0, curve: Curves.elasticOut);
+  }
+
+  void _showCreateFolderDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('New Folder'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Folder Name'),
+          autofocus: true,
+          style: const TextStyle(color: Colors.white),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (controller.text.isNotEmpty) {
+                context.read<DashboardBloc>().add(
+                  CreateFolder(controller.text),
+                );
+              }
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
   }
 }

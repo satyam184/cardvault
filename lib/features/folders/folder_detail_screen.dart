@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import '../../core/theme/app_colors.dart';
+
 import '../../core/common_widgets/glass_card.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/utils/excel_service.dart';
+import '../../core/utils/injection.dart';
 import '../../data/models/folder_model.dart';
+import '../../data/repositories/contact_repository.dart';
 import 'bloc/folder_bloc.dart';
 import 'bloc/folder_event.dart';
 import 'bloc/folder_state.dart';
-import '../../core/utils/excel_service.dart';
-import '../../core/utils/injection.dart';
 
 class FolderDetailScreen extends StatelessWidget {
   final ContactFolder folder;
@@ -19,7 +21,9 @@ class FolderDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => FolderBloc()..add(LoadFolderContacts(folder.id)),
+      create: (context) =>
+          FolderBloc(repository: sl<ContactRepository>())
+            ..add(LoadFolderContacts(folder.id)),
       child: Scaffold(
         appBar: AppBar(
           title: Text(folder.name),
@@ -29,7 +33,10 @@ class FolderDetailScreen extends StatelessWidget {
                 return IconButton(
                   icon: const Icon(LucideIcons.download),
                   onPressed: state is FolderLoaded
-                      ? () => sl<ExcelService>().exportContacts(state.contacts, folderName: folder.name)
+                      ? () => sl<ExcelService>().exportContacts(
+                          state.contacts,
+                          folderName: folder.name,
+                        )
                       : null,
                 );
               },
@@ -67,9 +74,14 @@ class FolderDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             borderRadius: 15,
             child: TextField(
-              onChanged: (value) => context.read<FolderBloc>().add(SearchContacts(value)),
+              onChanged: (value) =>
+                  context.read<FolderBloc>().add(SearchContacts(value)),
               decoration: const InputDecoration(
-                icon: Icon(LucideIcons.search, color: AppColors.textSecondary, size: 20),
+                icon: Icon(
+                  LucideIcons.search,
+                  color: AppColors.textSecondary,
+                  size: 20,
+                ),
                 hintText: 'Search contacts...',
                 border: InputBorder.none,
                 focusedBorder: InputBorder.none,
@@ -94,9 +106,16 @@ class FolderDetailScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(LucideIcons.userX, size: 60, color: AppColors.textMuted),
+                  const Icon(
+                    LucideIcons.userX,
+                    size: 60,
+                    color: AppColors.textMuted,
+                  ),
                   const SizedBox(height: 16),
-                  Text('No contacts found', style: Theme.of(context).textTheme.bodyLarge),
+                  Text(
+                    'No contacts found',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                 ],
               ),
             );
@@ -116,12 +135,21 @@ class FolderDetailScreen extends StatelessWidget {
                       backgroundColor: AppColors.primary.withOpacity(0.2),
                       child: Text(
                         contact.name[0],
-                        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                    title: Text(contact.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text(
+                      contact.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     subtitle: Text(contact.company ?? 'No Company'),
-                    trailing: const Icon(LucideIcons.chevronRight, color: AppColors.textMuted),
+                    trailing: const Icon(
+                      LucideIcons.chevronRight,
+                      color: AppColors.textMuted,
+                    ),
                     onTap: () {
                       // Navigate to Contact Detail
                     },
