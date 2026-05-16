@@ -33,6 +33,19 @@ class ContactRepository {
     }
   }
 
+  Future<List<ContactFolder>> getFoldersList() async {
+    try {
+      final response = await _dioClient.dio.get('/api/folders/list');
+      if (response.data['success'] == true && response.data['folders'] != null) {
+        final List foldersJson = response.data['folders'];
+        return foldersJson.map((json) => ContactFolder.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<ContactFolder> createFolder(String name, {String? description}) async {
     try {
       final response = await _dioClient.dio.post(

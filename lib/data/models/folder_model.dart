@@ -20,7 +20,7 @@ class ContactFolder extends Equatable {
       id: json['_id'] ?? json['id'],
       name: json['name'],
       description: json['description'],
-      createdAt: DateTime.parse(json['createdAt']),
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
       contactCount: json['contactsCount'] ?? json['contactCount'] ?? 0,
     );
   }

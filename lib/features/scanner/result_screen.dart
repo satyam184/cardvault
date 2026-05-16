@@ -36,7 +36,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
   Future<void> _loadFolders() async {
     try {
-      final folders = await sl<ContactRepository>().getFolders();
+      final folders = await sl<ContactRepository>().getFoldersList();
       if (mounted) {
         setState(() {
           _folders = folders;
