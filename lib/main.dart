@@ -4,6 +4,7 @@ import 'core/theme/app_theme.dart';
 import 'core/utils/injection.dart' as di;
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/auth/auth_screen.dart';
+import 'features/splash/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,8 +27,9 @@ class CardVaultApp extends StatelessWidget {
       title: 'CardVault',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      initialRoute: '/auth',
+      initialRoute: '/splash',
       routes: {
+        '/splash': (context) => const SplashScreen(),
         '/auth': (context) => const AuthScreen(),
         '/dashboard': (context) => const DashboardScreen(),
       },
