@@ -13,6 +13,8 @@ import 'bloc/dashboard_bloc.dart';
 import 'bloc/dashboard_event.dart';
 import 'bloc/dashboard_state.dart';
 
+import '../auth/bloc/auth_bloc.dart';
+
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
@@ -21,35 +23,42 @@ class DashboardScreen extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final horizontalPadding = size.width > 600 ? size.width * 0.1 : 20.0;
 
-    return BlocProvider(
-      create: (context) =>
-          DashboardBloc(repository: sl<ContactRepository>())
-            ..add(LoadDashboard()),
-      child: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.background,
-                AppColors.background.withOpacity(0.8),
-                AppColors.primary.withOpacity(0.05),
-              ],
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state.status == AuthStatus.unauthenticated) {
+          Navigator.pushReplacementNamed(context, '/auth');
+        }
+      },
+      child: BlocProvider(
+        create: (context) =>
+            DashboardBloc(repository: sl<ContactRepository>())
+              ..add(LoadDashboard()),
+        child: Scaffold(
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.background,
+                  AppColors.background.withOpacity(0.8),
+                  AppColors.primary.withOpacity(0.05),
+                ],
+              ),
+            ),
+            child: SafeArea(
+              child: CustomScrollView(
+                slivers: [
+                  _buildAppBar(context, horizontalPadding),
+                  _buildStats(context, horizontalPadding),
+                  _buildFolderHeader(context, horizontalPadding),
+                  _buildFolderGrid(context, horizontalPadding),
+                ],
+              ),
             ),
           ),
-          child: SafeArea(
-            child: CustomScrollView(
-              slivers: [
-                _buildAppBar(context, horizontalPadding),
-                _buildStats(context, horizontalPadding),
-                _buildFolderHeader(context, horizontalPadding),
-                _buildFolderGrid(context, horizontalPadding),
-              ],
-            ),
-          ),
+          floatingActionButton: _buildFAB(context),
         ),
-        floatingActionButton: _buildFAB(context),
       ),
     );
   }
@@ -71,9 +80,19 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ],
             ),
-            IconButton(
-              icon: const Icon(LucideIcons.bell, color: Colors.white70),
-              onPressed: () {},
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(LucideIcons.logOut, color: Colors.white70),
+                  onPressed: () {
+                    context.read<AuthBloc>().add(LoggedOut());
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(LucideIcons.bell, color: Colors.white70),
+                  onPressed: () {},
+                ),
+              ],
             ),
           ],
         ),

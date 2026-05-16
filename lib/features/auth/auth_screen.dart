@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/common_widgets/glass_card.dart';
+import '../../core/utils/injection.dart';
+import 'bloc/auth_bloc.dart';
+import 'bloc/login_bloc.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -13,74 +17,118 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool isLogin = true;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Background Gradient
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.background, AppColors.surface],
-                ),
+    return BlocProvider(
+      create: (context) => sl<LoginBloc>(),
+      child: BlocListener<LoginBloc, LoginState>(
+        listener: (context, state) {
+          if (state.status == LoginStatus.success) {
+            context.read<AuthBloc>().add(LoggedIn(state.user!));
+            Navigator.pushReplacementNamed(context, '/dashboard');
+          } else if (state.status == LoginStatus.failure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error ?? 'Authentication failed'),
+                backgroundColor: Colors.redAccent,
               ),
-            ),
-          ),
-          // Animated Background Circles
-          const _AnimatedBackground(),
-          
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(30),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 50),
-                  const Icon(LucideIcons.creditCard, color: AppColors.primary, size: 60)
-                      .animate()
-                      .fadeIn()
-                      .scale(),
-                  const SizedBox(height: 20),
-                  Text(
-                    isLogin ? 'Welcome Back' : 'Create Account',
-                    style: Theme.of(context).textTheme.displayLarge,
-                  ).animate().fadeIn(delay: 200.ms).slideX(),
-                  Text(
-                    isLogin ? 'Sign in to continue' : 'Join CardVault today',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ).animate().fadeIn(delay: 300.ms),
-                  const SizedBox(height: 40),
-                  
-                  _AuthForm(
-                    isLogin: isLogin,
-                    onSubmitted: () {
-                      Navigator.pushReplacementNamed(context, '/dashboard');
-                    },
-                  ),
-                  
-                  const SizedBox(height: 30),
-                  const _SocialLoginSection(),
-                  
-                  const SizedBox(height: 30),
-                  Center(
-                    child: TextButton(
-                      onPressed: () => setState(() => isLogin = !isLogin),
-                      child: Text(
-                        isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login",
-                        style: const TextStyle(color: AppColors.textSecondary),
-                      ),
+            );
+          }
+        },
+      child: Builder(
+        builder: (context) => Scaffold(
+          body: Stack(
+            children: [
+              Positioned.fill(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppColors.background, AppColors.surface],
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+              const _AnimatedBackground(),
+              SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 50),
+                      const Icon(LucideIcons.creditCard,
+                              color: AppColors.primary, size: 60)
+                          .animate()
+                          .fadeIn()
+                          .scale(),
+                      const SizedBox(height: 20),
+                      Text(
+                        isLogin ? 'Welcome Back' : 'Create Account',
+                        style: Theme.of(context).textTheme.displayLarge,
+                      ).animate().fadeIn(delay: 200.ms).slideX(),
+                      Text(
+                        isLogin ? 'Sign in to continue' : 'Join CardVault today',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ).animate().fadeIn(delay: 300.ms),
+                      const SizedBox(height: 40),
+                      _AuthForm(
+                        isLogin: isLogin,
+                        emailController: _emailController,
+                        passwordController: _passwordController,
+                        nameController: _nameController,
+                        onSubmitted: () {
+                          final bloc = context.read<LoginBloc>();
+                          if (isLogin) {
+                            bloc.add(LoginSubmitted(
+                              _emailController.text,
+                              _passwordController.text,
+                            ));
+                          } else {
+                            bloc.add(RegisterSubmitted(
+                              _nameController.text,
+                              _emailController.text,
+                              _passwordController.text,
+                            ));
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 30),
+                      const _SocialLoginSection(),
+                      const SizedBox(height: 30),
+                      Center(
+                        child: TextButton(
+                          onPressed: () => setState(() => isLogin = !isLogin),
+                          child: Text(
+                            isLogin
+                                ? "Don't have an account? Sign Up"
+                                : "Already have an account? Login",
+                            style:
+                                const TextStyle(color: AppColors.textSecondary),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
+      ),
       ),
     );
   }
@@ -93,7 +141,6 @@ class _AnimatedBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Top Right Glow
         Positioned(
           top: -150,
           right: -150,
@@ -111,7 +158,6 @@ class _AnimatedBackground extends StatelessWidget {
             ),
           ),
         ),
-        // Bottom Left Glow
         Positioned(
           bottom: -200,
           left: -200,
@@ -136,52 +182,87 @@ class _AnimatedBackground extends StatelessWidget {
 
 class _AuthForm extends StatelessWidget {
   final bool isLogin;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final TextEditingController nameController;
   final VoidCallback onSubmitted;
 
-  const _AuthForm({required this.isLogin, required this.onSubmitted});
+  const _AuthForm({
+    required this.isLogin,
+    required this.emailController,
+    required this.passwordController,
+    required this.nameController,
+    required this.onSubmitted,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        if (!isLogin)
-          const _CustomTextField(icon: LucideIcons.user, label: 'Full Name')
-              .animate()
-              .fadeIn()
-              .slideY(begin: 0.1),
-        const SizedBox(height: 20),
-        const _CustomTextField(icon: LucideIcons.mail, label: 'Email Address'),
-        const SizedBox(height: 20),
-        const _CustomTextField(icon: LucideIcons.lock, label: 'Password', isPassword: true),
-        const SizedBox(height: 30),
-        SizedBox(
-          width: double.infinity,
-          height: 60,
-          child: ElevatedButton(
-            onPressed: onSubmitted,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              elevation: 0,
+    return BlocBuilder<LoginBloc, LoginState>(
+      builder: (context, state) {
+        return Column(
+          children: [
+            if (!isLogin)
+              _CustomTextField(
+                controller: nameController,
+                icon: LucideIcons.user,
+                label: 'Full Name',
+              ).animate().fadeIn().slideY(begin: 0.1),
+            const SizedBox(height: 20),
+            _CustomTextField(
+              controller: emailController,
+              icon: LucideIcons.mail,
+              label: 'Email Address',
+              keyboardType: TextInputType.emailAddress,
             ),
-            child: Text(isLogin ? 'Login' : 'Sign Up', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          ),
-        ).animate().fadeIn(delay: 400.ms).scale(),
-      ],
+            const SizedBox(height: 20),
+            _CustomTextField(
+              controller: passwordController,
+              icon: LucideIcons.lock,
+              label: 'Password',
+              isPassword: true,
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              height: 60,
+              child: ElevatedButton(
+                onPressed: state.status == LoginStatus.loading ? null : onSubmitted,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  elevation: 0,
+                ),
+                child: state.status == LoginStatus.loading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        isLogin ? 'Login' : 'Sign Up',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+              ),
+            ).animate().fadeIn(delay: 400.ms).scale(),
+          ],
+        );
+      },
     );
   }
 }
 
 class _CustomTextField extends StatelessWidget {
+  final TextEditingController controller;
   final IconData icon;
   final String label;
   final bool isPassword;
+  final TextInputType? keyboardType;
 
   const _CustomTextField({
+    required this.controller,
     required this.icon,
     required this.label,
     this.isPassword = false,
+    this.keyboardType,
   });
 
   @override
@@ -189,7 +270,9 @@ class _CustomTextField extends StatelessWidget {
     return GlassCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: TextField(
+        controller: controller,
         obscureText: isPassword,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
           icon: Icon(icon, color: AppColors.primary, size: 20),
           labelText: label,
