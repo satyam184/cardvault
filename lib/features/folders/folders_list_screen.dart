@@ -261,6 +261,7 @@ class _FoldersListScreenState extends State<FoldersListScreen> {
           TextButton(
             onPressed: () async {
               if (nameController.text.isNotEmpty) {
+                Navigator.pop(dialogContext); // Close dialog immediately
                 try {
                   await sl<ContactRepository>().updateFolder(
                     folder.id,
@@ -283,8 +284,9 @@ class _FoldersListScreenState extends State<FoldersListScreen> {
                     );
                   }
                 }
+              } else {
+                Navigator.pop(dialogContext);
               }
-              if (context.mounted) Navigator.pop(dialogContext);
             },
             child: const Text('Save'),
           ),
@@ -307,6 +309,7 @@ class _FoldersListScreenState extends State<FoldersListScreen> {
           ),
           TextButton(
             onPressed: () async {
+              Navigator.pop(dialogContext); // Close dialog immediately
               try {
                 await sl<ContactRepository>().deleteFolder(folder.id);
                 if (context.mounted) {
@@ -325,7 +328,6 @@ class _FoldersListScreenState extends State<FoldersListScreen> {
                   );
                 }
               }
-              if (context.mounted) Navigator.pop(dialogContext);
             },
             child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
           ),
