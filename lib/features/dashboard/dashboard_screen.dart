@@ -193,17 +193,9 @@ class DashboardScreen extends StatelessWidget {
         padding:
             EdgeInsets.fromLTRB(horizontalPadding, 30, horizontalPadding, 10),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('My Folders', style: Theme.of(context).textTheme.titleLarge),
-            const Spacer(),
-            TextButton(
-              onPressed: () => Navigator.pushNamed(context, '/folders'),
-              child: const Text(
-                'See More',
-                style: TextStyle(color: AppColors.primary, fontSize: 14),
-              ),
-            ),
-            const SizedBox(width: 10),
             Builder(
               builder: (innerContext) => IconButton(
                 icon: const Icon(
@@ -270,7 +262,43 @@ class DashboardScreen extends StatelessWidget {
                 crossAxisSpacing: 15,
                 childAspectRatio: 1.1,
               ),
-              delegate: SliverChildBuilderDelegate((context, index) {
+          delegate: SliverChildBuilderDelegate((context, index) {
+                if (index == state.folders.length) {
+                  // Show "See More" tile
+                  return GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, '/folders'),
+                    child: GlassCard(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              LucideIcons.arrowRight,
+                              color: AppColors.primary,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'See All',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
+                  );
+                }
+
                 final folder = state.folders[index];
                 return GestureDetector(
                   onTap: () {
@@ -313,7 +341,7 @@ class DashboardScreen extends StatelessWidget {
                       .fadeIn(delay: (index * 100).ms)
                       .slideY(begin: 0.1),
                 );
-              }, childCount: state.folders.length),
+              }, childCount: state.folders.length + (state.folders.length >= 3 ? 1 : 0)),
             ),
           );
         }
