@@ -32,7 +32,7 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
           ),
           // Animated Background Circles
-          _buildAnimatedBg(),
+          const _AnimatedBackground(),
           
           SafeArea(
             child: SingleChildScrollView(
@@ -56,10 +56,15 @@ class _AuthScreenState extends State<AuthScreen> {
                   ).animate().fadeIn(delay: 300.ms),
                   const SizedBox(height: 40),
                   
-                  _buildForm(),
+                  _AuthForm(
+                    isLogin: isLogin,
+                    onSubmitted: () {
+                      Navigator.pushReplacementNamed(context, '/dashboard');
+                    },
+                  ),
                   
                   const SizedBox(height: 30),
-                  _buildSocialLogin(),
+                  const _SocialLoginSection(),
                   
                   const SizedBox(height: 30),
                   Center(
@@ -79,52 +84,81 @@ class _AuthScreenState extends State<AuthScreen> {
       ),
     );
   }
+}
 
-  Widget _buildAnimatedBg() {
+class _AnimatedBackground extends StatelessWidget {
+  const _AnimatedBackground();
+
+  @override
+  Widget build(BuildContext context) {
     return Stack(
       children: [
+        // Top Right Glow
         Positioned(
-          top: -100,
-          right: -100,
+          top: -150,
+          right: -150,
           child: Container(
-            width: 300,
-            height: 300,
+            width: 400,
+            height: 400,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primary.withOpacity(0.1),
-            ),
-          ).animate(onPlay: (controller) => controller.repeat()).scale(
-                begin: const Offset(1, 1),
-                end: const Offset(1.2, 1.2),
-                duration: 5.seconds,
-                curve: Curves.easeInOut,
+              gradient: RadialGradient(
+                colors: [
+                  AppColors.primary.withOpacity(0.15),
+                  AppColors.primary.withOpacity(0),
+                ],
               ),
+            ),
+          ),
+        ),
+        // Bottom Left Glow
+        Positioned(
+          bottom: -200,
+          left: -200,
+          child: Container(
+            width: 500,
+            height: 500,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  AppColors.secondary.withOpacity(0.1),
+                  AppColors.secondary.withOpacity(0),
+                ],
+              ),
+            ),
+          ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildForm() {
+class _AuthForm extends StatelessWidget {
+  final bool isLogin;
+  final VoidCallback onSubmitted;
+
+  const _AuthForm({required this.isLogin, required this.onSubmitted});
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         if (!isLogin)
-          _buildTextField(LucideIcons.user, 'Full Name')
+          const _CustomTextField(icon: LucideIcons.user, label: 'Full Name')
               .animate()
               .fadeIn()
               .slideY(begin: 0.1),
         const SizedBox(height: 20),
-        _buildTextField(LucideIcons.mail, 'Email Address'),
+        const _CustomTextField(icon: LucideIcons.mail, label: 'Email Address'),
         const SizedBox(height: 20),
-        _buildTextField(LucideIcons.lock, 'Password', isPassword: true),
+        const _CustomTextField(icon: LucideIcons.lock, label: 'Password', isPassword: true),
         const SizedBox(height: 30),
         SizedBox(
           width: double.infinity,
           height: 60,
           child: ElevatedButton(
-            onPressed: () {
-              // Navigate to Dashboard
-              Navigator.pushReplacementNamed(context, '/dashboard');
-            },
+            onPressed: onSubmitted,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
@@ -137,8 +171,21 @@ class _AuthScreenState extends State<AuthScreen> {
       ],
     );
   }
+}
 
-  Widget _buildTextField(IconData icon, String label, {bool isPassword = false}) {
+class _CustomTextField extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isPassword;
+
+  const _CustomTextField({
+    required this.icon,
+    required this.label,
+    this.isPassword = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return GlassCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: TextField(
@@ -154,8 +201,13 @@ class _AuthScreenState extends State<AuthScreen> {
       ),
     );
   }
+}
 
-  Widget _buildSocialLogin() {
+class _SocialLoginSection extends StatelessWidget {
+  const _SocialLoginSection();
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         const Row(
@@ -169,19 +221,26 @@ class _AuthScreenState extends State<AuthScreen> {
           ],
         ),
         const SizedBox(height: 30),
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _socialButton(LucideIcons.chrome),
-            const SizedBox(width: 20),
-            _socialButton(LucideIcons.apple),
+            _SocialButton(icon: LucideIcons.chrome),
+            SizedBox(width: 20),
+            _SocialButton(icon: LucideIcons.apple),
           ],
         ),
       ],
     ).animate().fadeIn(delay: 500.ms);
   }
+}
 
-  Widget _socialButton(IconData icon) {
+class _SocialButton extends StatelessWidget {
+  final IconData icon;
+
+  const _SocialButton({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
     return GlassCard(
       width: 60,
       height: 60,
