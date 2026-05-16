@@ -60,16 +60,28 @@ class FolderDetailScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _buildSearchBar(context, horizontalPadding),
-              Expanded(child: _buildContactList(context, horizontalPadding)),
+              _SearchBar(horizontalPadding: horizontalPadding),
+              Expanded(
+                child: _ContactList(
+                  horizontalPadding: horizontalPadding,
+                  folder: folder,
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildSearchBar(BuildContext context, double horizontalPadding) {
+class _SearchBar extends StatelessWidget {
+  final double horizontalPadding;
+
+  const _SearchBar({required this.horizontalPadding});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 20),
       child: BlocBuilder<FolderBloc, FolderState>(
@@ -97,8 +109,19 @@ class FolderDetailScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildContactList(BuildContext context, double horizontalPadding) {
+class _ContactList extends StatelessWidget {
+  final double horizontalPadding;
+  final ContactFolder folder;
+
+  const _ContactList({
+    required this.horizontalPadding,
+    required this.folder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<FolderBloc, FolderState>(
       builder: (context, state) {
         if (state is FolderLoading) {
