@@ -74,6 +74,32 @@ class ContactRepository {
 
   List<BusinessContact> get contacts => List.unmodifiable(_contacts);
 
+  Future<BusinessContact> createContact(BusinessContact contact, String folderId) async {
+    try {
+      final response = await _dioClient.dio.post(
+        '/api/contacts',
+        data: {
+          'folderId': folderId,
+          'name': contact.name,
+          'company': contact.company ?? '',
+          'jobTitle': contact.jobTitle ?? '',
+          'email': contact.email ?? '',
+          'phone': contact.phone ?? '',
+          'website': contact.website ?? '',
+          'address': contact.address ?? '',
+          'linkedin': '',
+          'socialHandles': {
+            'instagram': '',
+            'twitter': ''
+          }
+        },
+      );
+      return BusinessContact.fromJson(response.data['contact']);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   void saveContact(BusinessContact contact, String folderId) {
     final newContact = contact.copyWith(folderId: folderId);
     _contacts.add(newContact);

@@ -37,6 +37,52 @@ class BusinessContact extends Equatable {
     this.notes,
   });
 
+  factory BusinessContact.fromJson(Map<String, dynamic> json) {
+    return BusinessContact(
+      id: json['_id'] ?? json['id'] ?? '',
+      name: json['name'] ?? '',
+      company: json['company'],
+      jobTitle: json['jobTitle'],
+      email: json['email'],
+      phone: json['phone'],
+      website: json['website'],
+      address: json['address'],
+      linkedin: json['linkedin'],
+      socialHandles: json['socialHandles'] != null
+          ? Map<String, String>.from(json['socialHandles'])
+          : null,
+      folderId: json['folderId'] ?? '',
+      frontImagePath: json['frontImageUrl'] ?? json['frontImagePath'],
+      backImagePath: json['backImageUrl'] ?? json['backImagePath'],
+      isFavorite: json['isFavorite'] ?? false,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      notes: json['notes'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (id.isNotEmpty) '_id': id,
+      'name': name,
+      'company': company,
+      'jobTitle': jobTitle,
+      'email': email,
+      'phone': phone,
+      'website': website,
+      'address': address,
+      'linkedin': linkedin,
+      'socialHandles': socialHandles,
+      'folderId': folderId,
+      'frontImageUrl': frontImagePath,
+      'backImageUrl': backImagePath,
+      'isFavorite': isFavorite,
+      'createdAt': createdAt.toIso8601String(),
+      'notes': notes,
+    };
+  }
+
   BusinessContact copyWith({
     String? name,
     String? company,

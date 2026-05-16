@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../data/models/contact_model.dart';
@@ -8,6 +9,8 @@ import '../../data/repositories/contact_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/common_widgets/glass_card.dart';
 import '../../core/utils/injection.dart';
+import '../dashboard/bloc/dashboard_bloc.dart';
+import '../dashboard/bloc/dashboard_event.dart';
 
 class ResultScreen extends StatefulWidget {
   final BusinessContact contact;
@@ -22,6 +25,7 @@ class _ResultScreenState extends State<ResultScreen> {
   late TextEditingModel _model;
   String? _selectedFolderId;
   List<ContactFolder> _folders = [];
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -43,9 +47,9 @@ class _ResultScreenState extends State<ResultScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading folders: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading folders: $e')));
       }
     }
   }
@@ -60,29 +64,44 @@ class _ResultScreenState extends State<ResultScreen> {
         title: const Text('Review Details'),
         actions: [
           TextButton(
-            onPressed: _saveContact,
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            onPressed: _isSaving ? null : _saveContact,
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text(
+                    'Save',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 20),
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: 20,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildImagePreview(),
             const SizedBox(height: 30),
-            Text('Save to Folder', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Save to Folder',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 10),
             _buildFolderDropdown(),
             const SizedBox(height: 30),
-            Text('Extracted Information', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Extracted Information',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 15),
             _buildForm(size.width > 600),
           ],
@@ -91,7 +110,7 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
-  void _saveContact() {
+  Future<void> _saveContact() async {
     if (_selectedFolderId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select or create a folder first')),
@@ -99,7 +118,11 @@ class _ResultScreenState extends State<ResultScreen> {
       return;
     }
 
-    final updatedContact = BusinessContact(
+    setState(() {
+      _isSaving = true;
+    });
+
+    final newContact = BusinessContact(
       id: widget.contact.id,
       name: _model.name.text,
       company: _model.company.text,
@@ -114,16 +137,38 @@ class _ResultScreenState extends State<ResultScreen> {
       createdAt: widget.contact.createdAt,
     );
 
-    sl<ContactRepository>().saveContact(updatedContact, _selectedFolderId!);
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Contact saved successfully!'),
-        backgroundColor: AppColors.secondary,
-      ),
-    );
-    
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    try {
+      await sl<ContactRepository>().createContact(
+        newContact,
+        _selectedFolderId!,
+      );
+
+      if (mounted) {
+        context.read<DashboardBloc>().add(LoadDashboard());
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Contact saved successfully!'),
+            backgroundColor: AppColors.secondary,
+          ),
+        );
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save contact: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildFolderDropdown() {
@@ -136,10 +181,17 @@ class _ResultScreenState extends State<ResultScreen> {
           isExpanded: true,
           dropdownColor: AppColors.surface,
           icon: const Icon(LucideIcons.chevronDown, color: AppColors.primary),
-          items: _folders.map((f) => DropdownMenuItem(
-            value: f.id,
-            child: Text(f.name, style: const TextStyle(color: Colors.white)),
-          )).toList(),
+          items: _folders
+              .map(
+                (f) => DropdownMenuItem(
+                  value: f.id,
+                  child: Text(
+                    f.name,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              )
+              .toList(),
           onChanged: (val) => setState(() => _selectedFolderId = val),
           hint: const Text(
             'Select Folder',
@@ -169,7 +221,10 @@ class _ResultScreenState extends State<ResultScreen> {
                 const SizedBox(height: 4),
                 const Text(
                   'Front',
-                  style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -191,7 +246,10 @@ class _ResultScreenState extends State<ResultScreen> {
                 const SizedBox(height: 4),
                 const Text(
                   'Back',
-                  style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -219,14 +277,22 @@ class _ResultScreenState extends State<ResultScreen> {
     return Wrap(
       spacing: 20,
       runSpacing: 0,
-      children: fields.map((f) => SizedBox(
-        width: (MediaQuery.of(context).size.width * 0.8 - 20) / 2,
-        child: f,
-      )).toList(),
+      children: fields
+          .map(
+            (f) => SizedBox(
+              width: (MediaQuery.of(context).size.width * 0.8 - 20) / 2,
+              child: f,
+            ),
+          )
+          .toList(),
     ).animate().fadeIn(delay: 200.ms);
   }
 
-  Widget _buildField(IconData icon, String label, TextEditingController controller) {
+  Widget _buildField(
+    IconData icon,
+    String label,
+    TextEditingController controller,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: GlassCard(
@@ -257,11 +323,11 @@ class TextEditingModel {
   final TextEditingController address;
 
   TextEditingModel(BusinessContact contact)
-      : name = TextEditingController(text: contact.name),
-        company = TextEditingController(text: contact.company),
-        jobTitle = TextEditingController(text: contact.jobTitle),
-        email = TextEditingController(text: contact.email),
-        phone = TextEditingController(text: contact.phone),
-        website = TextEditingController(text: contact.website),
-        address = TextEditingController(text: contact.address);
+    : name = TextEditingController(text: contact.name),
+      company = TextEditingController(text: contact.company),
+      jobTitle = TextEditingController(text: contact.jobTitle),
+      email = TextEditingController(text: contact.email),
+      phone = TextEditingController(text: contact.phone),
+      website = TextEditingController(text: contact.website),
+      address = TextEditingController(text: contact.address);
 }
