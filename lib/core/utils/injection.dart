@@ -20,7 +20,7 @@ Future<void> init() async {
   // Data sources
 
   // Repositories
-  sl.registerLazySingleton<ContactRepository>(() => ContactRepository());
+  sl.registerLazySingleton<ContactRepository>(() => ContactRepository(sl()));
   sl.registerLazySingleton<AuthRepository>(() => AuthRepository(sl(), sl()));
 
   // Services

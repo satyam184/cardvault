@@ -9,23 +9,29 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   DashboardBloc({required ContactRepository repository}) 
       : _repository = repository,
         super(DashboardInitial()) {
-    on<LoadDashboard>((event, emit) async {
-      emit(DashboardLoading());
-      await Future.delayed(const Duration(milliseconds: 300));
-      _emitLoaded(emit);
-    });
-
-    on<CreateFolder>((event, emit) {
-      _repository.addFolder(event.name);
-      _emitLoaded(emit);
-    });
+    on<LoadDashboard>(_onLoadDashboard);
+    on<CreateFolder>(_onCreateFolder);
   }
 
-  void _emitLoaded(Emitter<DashboardState> emit) {
-    final folders = _repository.folders;
-    emit(DashboardLoaded(
-      folders: folders,
-      totalCards: folders.fold(0, (sum, f) => sum + f.contactCount),
-    ));
+  Future<void> _onLoadDashboard(LoadDashboard event, Emitter<DashboardState> emit) async {
+    emit(DashboardLoading());
+    try {
+      final folders = await _repository.getFolders();
+      emit(DashboardLoaded(
+        folders: folders,
+        totalCards: folders.fold(0, (sum, f) => sum + f.contactCount),
+      ));
+    } catch (e) {
+      emit(DashboardError(e.toString()));
+    }
+  }
+
+  Future<void> _onCreateFolder(CreateFolder event, Emitter<DashboardState> emit) async {
+    try {
+      await _repository.createFolder(event.name, description: event.description);
+      add(LoadDashboard());
+    } catch (e) {
+      emit(DashboardError('Failed to create folder: ${e.toString()}'));
+    }
   }
 }

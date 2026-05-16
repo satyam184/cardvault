@@ -27,9 +27,26 @@ class _ResultScreenState extends State<ResultScreen> {
   void initState() {
     super.initState();
     _model = TextEditingModel(widget.contact);
-    _folders = sl<ContactRepository>().folders;
-    if (_folders.isNotEmpty) {
-      _selectedFolderId = _folders.first.id;
+    _loadFolders();
+  }
+
+  Future<void> _loadFolders() async {
+    try {
+      final folders = await sl<ContactRepository>().getFolders();
+      if (mounted) {
+        setState(() {
+          _folders = folders;
+          if (_folders.isNotEmpty) {
+            _selectedFolderId = _folders.first.id;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading folders: $e')),
+        );
+      }
     }
   }
 

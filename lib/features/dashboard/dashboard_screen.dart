@@ -33,31 +33,43 @@ class DashboardScreen extends StatelessWidget {
         create: (context) =>
             DashboardBloc(repository: sl<ContactRepository>())
               ..add(LoadDashboard()),
-        child: Scaffold(
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.background,
-                  AppColors.background.withOpacity(0.8),
-                  AppColors.primary.withOpacity(0.05),
-                ],
+        child: BlocListener<DashboardBloc, DashboardState>(
+          listener: (context, state) {
+            if (state is DashboardError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.redAccent,
+                ),
+              );
+            }
+          },
+          child: Scaffold(
+            body: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.background,
+                    AppColors.background.withOpacity(0.8),
+                    AppColors.primary.withOpacity(0.05),
+                  ],
+                ),
+              ),
+              child: SafeArea(
+                child: CustomScrollView(
+                  slivers: [
+                    _buildAppBar(context, horizontalPadding),
+                    _buildStats(context, horizontalPadding),
+                    _buildFolderHeader(context, horizontalPadding),
+                    _buildFolderGrid(context, horizontalPadding),
+                  ],
+                ),
               ),
             ),
-            child: SafeArea(
-              child: CustomScrollView(
-                slivers: [
-                  _buildAppBar(context, horizontalPadding),
-                  _buildStats(context, horizontalPadding),
-                  _buildFolderHeader(context, horizontalPadding),
-                  _buildFolderGrid(context, horizontalPadding),
-                ],
-              ),
-            ),
+            floatingActionButton: _buildFAB(context),
           ),
-          floatingActionButton: _buildFAB(context),
         ),
       ),
     );
@@ -209,7 +221,37 @@ class DashboardScreen extends StatelessWidget {
             child: Center(child: CircularProgressIndicator()),
           );
         }
+        if (state is DashboardError) {
+          return SliverFillRemaining(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(LucideIcons.alertCircle,
+                      color: Colors.redAccent, size: 48),
+                  const SizedBox(height: 16),
+                  const Text('Something went wrong',
+                      style: TextStyle(color: Colors.white, fontSize: 18)),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () =>
+                        context.read<DashboardBloc>().add(LoadDashboard()),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
         if (state is DashboardLoaded) {
+          if (state.folders.isEmpty) {
+            return const SliverFillRemaining(
+              child: Center(
+                child: Text('No folders yet. Create one!',
+                    style: TextStyle(color: AppColors.textSecondary)),
+              ),
+            );
+          }
           return SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
             sliver: SliverGrid(
@@ -231,37 +273,36 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  child:
-                      GlassCard(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  LucideIcons.folder,
-                                  color: AppColors.primary,
-                                  size: 30,
-                                ),
-                                const Spacer(),
-                                Text(
-                                  folder.name,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  '${folder.contactCount} Cards',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ],
-                            ),
-                          )
-                          .animate()
-                          .fadeIn(delay: (index * 100).ms)
-                          .slideY(begin: 0.1),
+                  child: GlassCard(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          LucideIcons.folder,
+                          color: AppColors.primary,
+                          size: 30,
+                        ),
+                        const Spacer(),
+                        Text(
+                          folder.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          '${folder.contactCount} Cards',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  )
+                      .animate()
+                      .fadeIn(delay: (index * 100).ms)
+                      .slideY(begin: 0.1),
                 );
               }, childCount: state.folders.length),
             ),
@@ -287,17 +328,35 @@ class DashboardScreen extends StatelessWidget {
   }
 
   void _showCreateFolderDialog(BuildContext context) {
-    final controller = TextEditingController();
+    final nameController = TextEditingController();
+    final descController = TextEditingController();
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.surface,
         title: const Text('New Folder'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: 'Folder Name'),
-          autofocus: true,
-          style: const TextStyle(color: Colors.white),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                hintText: 'Folder Name',
+                hintStyle: TextStyle(color: Colors.white38),
+              ),
+              autofocus: true,
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: descController,
+              decoration: const InputDecoration(
+                hintText: 'Description (Optional)',
+                hintStyle: TextStyle(color: Colors.white38),
+              ),
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -306,9 +365,12 @@ class DashboardScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              if (controller.text.isNotEmpty) {
+              if (nameController.text.isNotEmpty) {
                 context.read<DashboardBloc>().add(
-                  CreateFolder(controller.text),
+                  CreateFolder(
+                    nameController.text,
+                    description: descController.text,
+                  ),
                 );
               }
               Navigator.pop(dialogContext);

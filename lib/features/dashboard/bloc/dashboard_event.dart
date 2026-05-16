@@ -10,7 +10,8 @@ class LoadDashboard extends DashboardEvent {}
 
 class CreateFolder extends DashboardEvent {
   final String name;
-  CreateFolder(this.name);
+  final String? description;
+  CreateFolder(this.name, {this.description});
   @override
-  List<Object?> get props => [name];
+  List<Object?> get props => [name, description];
 }

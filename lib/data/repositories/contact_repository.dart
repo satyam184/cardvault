@@ -1,41 +1,43 @@
+import '../../core/network/dio_client.dart';
 import '../models/contact_model.dart';
 import '../models/folder_model.dart';
 
 class ContactRepository {
-  final List<ContactFolder> _folders = [
-    ContactFolder(id: '1', name: 'Delhi Conference 2026', contactCount: 0, createdAt: DateTime.now()),
-    ContactFolder(id: '2', name: 'Mumbai Expo', contactCount: 0, createdAt: DateTime.now()),
-  ];
-  
+  final DioClient _dioClient;
   final List<BusinessContact> _contacts = [];
 
-  List<ContactFolder> get folders => List.unmodifiable(_folders);
-  List<BusinessContact> get contacts => List.unmodifiable(_contacts);
+  ContactRepository(this._dioClient);
 
-  void addFolder(String name) {
-    _folders.add(ContactFolder(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: name,
-      contactCount: 0,
-      createdAt: DateTime.now(),
-    ));
+  Future<List<ContactFolder>> getFolders() async {
+    try {
+      final response = await _dioClient.dio.get('/api/folders');
+      final List foldersJson = response.data['folders'];
+      return foldersJson.map((json) => ContactFolder.fromJson(json)).toList();
+    } catch (e) {
+      rethrow;
+    }
   }
+
+  Future<ContactFolder> createFolder(String name, {String? description}) async {
+    try {
+      final response = await _dioClient.dio.post(
+        '/api/folders',
+        data: {
+          'name': name,
+          'description': description ?? '',
+        },
+      );
+      return ContactFolder.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  List<BusinessContact> get contacts => List.unmodifiable(_contacts);
 
   void saveContact(BusinessContact contact, String folderId) {
     final newContact = contact.copyWith(folderId: folderId);
     _contacts.add(newContact);
-    
-    // Update folder count
-    final index = _folders.indexWhere((f) => f.id == folderId);
-    if (index != -1) {
-      final folder = _folders[index];
-      _folders[index] = ContactFolder(
-        id: folder.id,
-        name: folder.name,
-        contactCount: folder.contactCount + 1,
-        createdAt: folder.createdAt,
-      );
-    }
   }
 
   List<BusinessContact> getContactsByFolder(String folderId) {

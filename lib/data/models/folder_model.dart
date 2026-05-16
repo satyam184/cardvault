@@ -15,6 +15,16 @@ class ContactFolder extends Equatable {
     this.contactCount = 0,
   });
 
+  factory ContactFolder.fromJson(Map<String, dynamic> json) {
+    return ContactFolder(
+      id: json['_id'] ?? json['id'],
+      name: json['name'],
+      description: json['description'],
+      createdAt: DateTime.parse(json['createdAt']),
+      contactCount: json['contactsCount'] ?? json['contactCount'] ?? 0,
+    );
+  }
+
   @override
   List<Object?> get props => [id, name, description, createdAt, contactCount];
 }
