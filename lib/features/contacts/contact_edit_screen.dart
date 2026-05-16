@@ -19,6 +19,7 @@ class ContactEditScreen extends StatefulWidget {
 class _ContactEditScreenState extends State<ContactEditScreen> {
   final _formKey = GlobalKey<FormState>();
   late Map<String, TextEditingController> _controllers;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -43,21 +44,45 @@ class _ContactEditScreenState extends State<ContactEditScreen> {
     super.dispose();
   }
 
-  void _saveContact() {
+  Future<void> _saveContact() async {
     if (_formKey.currentState!.validate()) {
-      final updatedContact = widget.contact.copyWith(
-        name: _controllers['name']!.text,
-        company: _controllers['company']!.text,
-        jobTitle: _controllers['jobTitle']!.text,
-        email: _controllers['email']!.text,
-        phone: _controllers['phone']!.text,
-        website: _controllers['website']!.text,
-        address: _controllers['address']!.text,
-        notes: _controllers['notes']!.text,
-      );
+      setState(() => _isSaving = true);
 
-      sl<ContactRepository>().updateContact(updatedContact);
-      Navigator.pop(context, true);
+      final updateData = {
+        'folderId': widget.contact.folderId,
+        'name': _controllers['name']!.text,
+        'company': _controllers['company']!.text,
+        'jobTitle': _controllers['jobTitle']!.text,
+        'email': _controllers['email']!.text,
+        'phone': _controllers['phone']!.text,
+        'website': _controllers['website']!.text,
+        'address': _controllers['address']!.text,
+        'notes': _controllers['notes']!.text,
+        'linkedin': widget.contact.linkedin ?? '',
+      };
+
+      try {
+        await sl<ContactRepository>().updateContact(widget.contact.id, updateData);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Contact updated successfully!'),
+              backgroundColor: AppColors.secondary,
+            ),
+          );
+          Navigator.pop(context, true);
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isSaving = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to update contact: $e'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -70,10 +95,22 @@ class _ContactEditScreenState extends State<ContactEditScreen> {
       appBar: AppBar(
         title: const Text('Edit Contact'),
         actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.save, color: AppColors.primary),
-            onPressed: _saveContact,
-          ),
+          if (_isSaving)
+            const Padding(
+              padding: EdgeInsets.only(right: 20.0),
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            )
+          else
+            IconButton(
+              icon: const Icon(LucideIcons.save, color: AppColors.primary),
+              onPressed: _saveContact,
+            ),
         ],
       ),
       body: Container(
