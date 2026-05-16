@@ -8,12 +8,28 @@ class ContactRepository {
 
   ContactRepository(this._dioClient);
 
-  Future<List<ContactFolder>> getFolders() async {
+  Future<List<ContactFolder>> getFolders({int page = 1, int limit = 10}) async {
     try {
-      final response = await _dioClient.dio.get('/api/folders');
-      final List foldersJson = response.data['folders'];
-      return foldersJson.map((json) => ContactFolder.fromJson(json)).toList();
+      final response = await _dioClient.dio.get(
+        '/api/folders',
+        queryParameters: {
+          'page': page,
+          'limit': limit,
+        },
+      );
+      
+      // Safety check for response structure
+      if (response.data is Map && response.data.containsKey('folders')) {
+        final List foldersJson = response.data['folders'];
+        return foldersJson.map((json) => ContactFolder.fromJson(json)).toList();
+      } else if (response.data is List) {
+        // Fallback if the API returns a direct list
+        return (response.data as List).map((json) => ContactFolder.fromJson(json)).toList();
+      } else {
+        throw Exception('Unexpected API response format');
+      }
     } catch (e) {
+      print('DEBUG: getFolders Error: $e');
       rethrow;
     }
   }

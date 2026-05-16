@@ -190,11 +190,20 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildFolderHeader(BuildContext context, double horizontalPadding) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(horizontalPadding, 30, horizontalPadding, 10),
+        padding:
+            EdgeInsets.fromLTRB(horizontalPadding, 30, horizontalPadding, 10),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('My Folders', style: Theme.of(context).textTheme.titleLarge),
+            const Spacer(),
+            TextButton(
+              onPressed: () => Navigator.pushNamed(context, '/folders'),
+              child: const Text(
+                'See More',
+                style: TextStyle(color: AppColors.primary, fontSize: 14),
+              ),
+            ),
+            const SizedBox(width: 10),
             Builder(
               builder: (innerContext) => IconButton(
                 icon: const Icon(
