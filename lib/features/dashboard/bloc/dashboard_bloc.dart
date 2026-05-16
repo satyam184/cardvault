@@ -12,6 +12,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         super(DashboardInitial()) {
     on<LoadDashboard>(_onLoadDashboard);
     on<CreateFolder>(_onCreateFolder);
+    on<UpdateFolder>(_onUpdateFolder);
+    on<DeleteFolder>(_onDeleteFolder);
   }
 
   Future<void> _onLoadDashboard(LoadDashboard event, Emitter<DashboardState> emit) async {
@@ -43,6 +45,24 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       add(LoadDashboard());
     } catch (e) {
       emit(DashboardError('Failed to create folder: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onUpdateFolder(UpdateFolder event, Emitter<DashboardState> emit) async {
+    try {
+      await _repository.updateFolder(event.folderId, event.name, description: event.description);
+      add(LoadDashboard());
+    } catch (e) {
+      emit(DashboardError('Failed to update folder: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onDeleteFolder(DeleteFolder event, Emitter<DashboardState> emit) async {
+    try {
+      await _repository.deleteFolder(event.folderId);
+      add(LoadDashboard());
+    } catch (e) {
+      emit(DashboardError('Failed to delete folder: ${e.toString()}'));
     }
   }
 }

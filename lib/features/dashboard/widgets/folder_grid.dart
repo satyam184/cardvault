@@ -119,10 +119,37 @@ class FolderGrid extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          LucideIcons.folder,
-                          color: AppColors.primary,
-                          size: 30,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              LucideIcons.folder,
+                              color: AppColors.primary,
+                              size: 30,
+                            ),
+                            PopupMenuButton<String>(
+                              icon: const Icon(LucideIcons.moreVertical, color: Colors.white70, size: 20),
+                              padding: EdgeInsets.zero,
+                              onSelected: (value) {
+                                if (value == 'edit') {
+                                  _showEditFolderDialog(context, folder);
+                                } else if (value == 'delete') {
+                                  _showDeleteFolderDialog(context, folder);
+                                }
+                              },
+                              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                                const PopupMenuItem<String>(
+                                  value: 'edit',
+                                  child: Text('Edit'),
+                                ),
+                                const PopupMenuItem<String>(
+                                  value: 'delete',
+                                  child: Text('Delete', style: TextStyle(color: Colors.redAccent)),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                         const Spacer(),
                         Text(
@@ -151,6 +178,86 @@ class FolderGrid extends StatelessWidget {
         }
         return const SliverToBoxAdapter(child: SizedBox());
       },
+    );
+  }
+
+  void _showEditFolderDialog(BuildContext context, dynamic folder) {
+    final nameController = TextEditingController(text: folder.name);
+    final descController = TextEditingController(text: folder.description);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Edit Folder'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                hintText: 'Folder Name',
+                hintStyle: TextStyle(color: Colors.white38),
+              ),
+              autofocus: true,
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: descController,
+              decoration: const InputDecoration(
+                hintText: 'Description (Optional)',
+                hintStyle: TextStyle(color: Colors.white38),
+              ),
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (nameController.text.isNotEmpty) {
+                context.read<DashboardBloc>().add(
+                  UpdateFolder(
+                    folder.id,
+                    nameController.text,
+                    description: descController.text,
+                  ),
+                );
+              }
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteFolderDialog(BuildContext context, dynamic folder) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Delete Folder'),
+        content: Text('Are you sure you want to delete "${folder.name}"?\nThis action cannot be undone.', style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<DashboardBloc>().add(DeleteFolder(folder.id));
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
     );
   }
 }

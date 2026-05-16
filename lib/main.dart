@@ -9,6 +9,8 @@ import 'features/auth/auth_screen.dart';
 import 'features/splash/splash_screen.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/folders/folders_list_screen.dart';
+import 'features/dashboard/bloc/dashboard_bloc.dart';
+import 'features/dashboard/bloc/dashboard_event.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +33,9 @@ class CardVaultApp extends StatelessWidget {
       providers: [
         BlocProvider<AuthBloc>(
           create: (context) => sl<AuthBloc>()..add(AppStarted()),
+        ),
+        BlocProvider<DashboardBloc>(
+          create: (context) => sl<DashboardBloc>()..add(LoadDashboard()),
         ),
       ],
       child: MaterialApp(

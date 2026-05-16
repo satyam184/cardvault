@@ -28,23 +28,19 @@ class DashboardScreen extends StatelessWidget {
           Navigator.pushReplacementNamed(context, '/auth');
         }
       },
-      child: BlocProvider(
-        create: (context) =>
-            DashboardBloc(repository: sl<ContactRepository>())
-              ..add(LoadDashboard()),
-        child: BlocListener<DashboardBloc, DashboardState>(
-          listener: (context, state) {
-            if (state is DashboardError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.redAccent,
-                ),
-              );
-            }
-          },
-          child: Scaffold(
-            body: Container(
+      child: BlocListener<DashboardBloc, DashboardState>(
+        listener: (context, state) {
+          if (state is DashboardError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+          }
+        },
+        child: Scaffold(
+          body: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -70,7 +66,6 @@ class DashboardScreen extends StatelessWidget {
             floatingActionButton: const DashboardFAB(),
           ),
         ),
-      ),
     );
   }
 }

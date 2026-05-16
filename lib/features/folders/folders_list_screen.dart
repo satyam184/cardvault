@@ -7,6 +7,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/injection.dart';
 import '../../data/models/folder_model.dart';
 import '../../data/repositories/contact_repository.dart';
+import '../dashboard/bloc/dashboard_bloc.dart';
+import '../dashboard/bloc/dashboard_event.dart';
 import 'folder_detail_screen.dart';
 
 class FoldersListScreen extends StatefulWidget {
@@ -188,6 +190,26 @@ class _FoldersListScreenState extends State<FoldersListScreen> {
                                       ),
                                     ],
                                   ),
+                                  PopupMenuButton<String>(
+                                    icon: const Icon(LucideIcons.moreVertical, color: Colors.white70),
+                                    onSelected: (value) {
+                                      if (value == 'edit') {
+                                        _showEditFolderDialog(context, folder);
+                                      } else if (value == 'delete') {
+                                        _showDeleteFolderDialog(context, folder);
+                                      }
+                                    },
+                                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                                      const PopupMenuItem<String>(
+                                        value: 'edit',
+                                        child: Text('Edit'),
+                                      ),
+                                      const PopupMenuItem<String>(
+                                        value: 'delete',
+                                        child: Text('Delete', style: TextStyle(color: Colors.redAccent)),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ).animate().fadeIn(delay: (index % 10 * 50).ms).slideX(),
@@ -196,6 +218,118 @@ class _FoldersListScreenState extends State<FoldersListScreen> {
                       },
                     ),
                   ),
+      ),
+    );
+  }
+
+  void _showEditFolderDialog(BuildContext context, dynamic folder) {
+    final nameController = TextEditingController(text: folder.name);
+    final descController = TextEditingController(text: folder.description);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Edit Folder'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                hintText: 'Folder Name',
+                hintStyle: TextStyle(color: Colors.white38),
+              ),
+              autofocus: true,
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: descController,
+              decoration: const InputDecoration(
+                hintText: 'Description (Optional)',
+                hintStyle: TextStyle(color: Colors.white38),
+              ),
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (nameController.text.isNotEmpty) {
+                try {
+                  await sl<ContactRepository>().updateFolder(
+                    folder.id,
+                    nameController.text,
+                    description: descController.text,
+                  );
+                  if (context.mounted) {
+                    context.read<DashboardBloc>().add(LoadDashboard());
+                  }
+                  setState(() {
+                    _folders.clear();
+                    _currentPage = 1;
+                    _hasMore = true;
+                  });
+                  await _loadMoreFolders();
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to update: $e')),
+                    );
+                  }
+                }
+              }
+              if (context.mounted) Navigator.pop(dialogContext);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteFolderDialog(BuildContext context, dynamic folder) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Delete Folder'),
+        content: Text('Are you sure you want to delete "${folder.name}"?\nThis action cannot be undone.', style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await sl<ContactRepository>().deleteFolder(folder.id);
+                if (context.mounted) {
+                  context.read<DashboardBloc>().add(LoadDashboard());
+                }
+                setState(() {
+                  _folders.clear();
+                  _currentPage = 1;
+                  _hasMore = true;
+                });
+                await _loadMoreFolders();
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to delete: $e')),
+                  );
+                }
+              }
+              if (context.mounted) Navigator.pop(dialogContext);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
       ),
     );
   }

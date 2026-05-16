@@ -49,6 +49,29 @@ class ContactRepository {
     }
   }
 
+  Future<ContactFolder> updateFolder(String folderId, String name, {String? description}) async {
+    try {
+      final response = await _dioClient.dio.patch(
+        '/api/folders/$folderId',
+        data: {
+          'name': name,
+          'description': description ?? '',
+        },
+      );
+      return ContactFolder.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteFolder(String folderId) async {
+    try {
+      await _dioClient.dio.delete('/api/folders/$folderId');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   List<BusinessContact> get contacts => List.unmodifiable(_contacts);
 
   void saveContact(BusinessContact contact, String folderId) {

@@ -6,6 +6,7 @@ import '../network/dio_client.dart';
 import '../services/token_storage_service.dart';
 import '../../features/auth/bloc/auth_bloc.dart';
 import '../../features/auth/bloc/login_bloc.dart';
+import '../../features/dashboard/bloc/dashboard_bloc.dart';
 import 'ocr_service.dart';
 import 'ai_service.dart';
 import 'excel_service.dart';
@@ -16,6 +17,7 @@ Future<void> init() async {
   // Features
   sl.registerFactory(() => AuthBloc(sl(), sl()));
   sl.registerFactory(() => LoginBloc(sl()));
+  sl.registerFactory(() => DashboardBloc(repository: sl()));
 
   // Data sources
 
