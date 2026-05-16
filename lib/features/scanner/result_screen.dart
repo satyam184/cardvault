@@ -35,18 +35,27 @@ class _ResultScreenState extends State<ResultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final horizontalPadding = size.width > 600 ? size.width * 0.1 : 20.0;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Review Details'),
         actions: [
           TextButton(
             onPressed: _saveContact,
-            child: const Text('Save', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Save',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -58,7 +67,7 @@ class _ResultScreenState extends State<ResultScreen> {
             const SizedBox(height: 30),
             Text('Extracted Information', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 15),
-            _buildForm(),
+            _buildForm(size.width > 600),
           ],
         ),
       ),
@@ -91,7 +100,10 @@ class _ResultScreenState extends State<ResultScreen> {
     sl<ContactRepository>().saveContact(updatedContact, _selectedFolderId!);
     
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Contact saved successfully!'), backgroundColor: AppColors.secondary),
+      const SnackBar(
+        content: Text('Contact saved successfully!'),
+        backgroundColor: AppColors.secondary,
+      ),
     );
     
     Navigator.of(context).popUntil((route) => route.isFirst);
@@ -112,7 +124,10 @@ class _ResultScreenState extends State<ResultScreen> {
             child: Text(f.name, style: const TextStyle(color: Colors.white)),
           )).toList(),
           onChanged: (val) => setState(() => _selectedFolderId = val),
-          hint: const Text('Select Folder', style: TextStyle(color: AppColors.textSecondary)),
+          hint: const Text(
+            'Select Folder',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
         ),
       ),
     );
@@ -127,10 +142,18 @@ class _ResultScreenState extends State<ResultScreen> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.file(File(widget.contact.frontImagePath!), height: 120, width: double.infinity, fit: BoxFit.cover),
+                  child: Image.file(
+                    File(widget.contact.frontImagePath!),
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                const Text('Front', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                const Text(
+                  'Front',
+                  style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                ),
               ],
             ),
           ),
@@ -141,10 +164,18 @@ class _ResultScreenState extends State<ResultScreen> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.file(File(widget.contact.backImagePath!), height: 120, width: double.infinity, fit: BoxFit.cover),
+                  child: Image.file(
+                    File(widget.contact.backImagePath!),
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                const Text('Back', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                const Text(
+                  'Back',
+                  style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                ),
               ],
             ),
           ),
@@ -153,17 +184,28 @@ class _ResultScreenState extends State<ResultScreen> {
     ).animate().fadeIn().slideY(begin: 0.1);
   }
 
-  Widget _buildForm() {
-    return Column(
-      children: [
-        _buildField(LucideIcons.user, 'Full Name', _model.name),
-        _buildField(LucideIcons.briefcase, 'Company', _model.company),
-        _buildField(LucideIcons.award, 'Job Title', _model.jobTitle),
-        _buildField(LucideIcons.mail, 'Email Address', _model.email),
-        _buildField(LucideIcons.phone, 'Phone Number', _model.phone),
-        _buildField(LucideIcons.globe, 'Website', _model.website),
-        _buildField(LucideIcons.mapPin, 'Address', _model.address),
-      ],
+  Widget _buildForm(bool isWide) {
+    final fields = [
+      _buildField(LucideIcons.user, 'Full Name', _model.name),
+      _buildField(LucideIcons.briefcase, 'Company', _model.company),
+      _buildField(LucideIcons.award, 'Job Title', _model.jobTitle),
+      _buildField(LucideIcons.mail, 'Email Address', _model.email),
+      _buildField(LucideIcons.phone, 'Phone Number', _model.phone),
+      _buildField(LucideIcons.globe, 'Website', _model.website),
+      _buildField(LucideIcons.mapPin, 'Address', _model.address),
+    ];
+
+    if (!isWide) {
+      return Column(children: fields).animate().fadeIn(delay: 200.ms);
+    }
+
+    return Wrap(
+      spacing: 20,
+      runSpacing: 0,
+      children: fields.map((f) => SizedBox(
+        width: (MediaQuery.of(context).size.width * 0.8 - 20) / 2,
+        child: f,
+      )).toList(),
     ).animate().fadeIn(delay: 200.ms);
   }
 

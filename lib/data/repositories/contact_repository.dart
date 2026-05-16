@@ -41,4 +41,11 @@ class ContactRepository {
   List<BusinessContact> getContactsByFolder(String folderId) {
     return _contacts.where((c) => c.folderId == folderId).toList();
   }
+
+  void updateContact(BusinessContact updatedContact) {
+    final index = _contacts.indexWhere((c) => c.id == updatedContact.id);
+    if (index != -1) {
+      _contacts[index] = updatedContact;
+    }
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../contacts/contact_edit_screen.dart';
 
 import '../../core/common_widgets/glass_card.dart';
 import '../../core/theme/app_colors.dart';
@@ -20,6 +21,9 @@ class FolderDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final horizontalPadding = size.width > 600 ? size.width * 0.1 : 20.0;
+
     return BlocProvider(
       create: (context) =>
           FolderBloc(repository: sl<ContactRepository>())
@@ -56,8 +60,8 @@ class FolderDetailScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _buildSearchBar(context),
-              Expanded(child: _buildContactList(context)),
+              _buildSearchBar(context, horizontalPadding),
+              Expanded(child: _buildContactList(context, horizontalPadding)),
             ],
           ),
         ),
@@ -65,9 +69,9 @@ class FolderDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchBar(BuildContext context) {
+  Widget _buildSearchBar(BuildContext context, double horizontalPadding) {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 20),
       child: BlocBuilder<FolderBloc, FolderState>(
         builder: (context, state) {
           return GlassCard(
@@ -94,7 +98,7 @@ class FolderDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContactList(BuildContext context) {
+  Widget _buildContactList(BuildContext context, double horizontalPadding) {
     return BlocBuilder<FolderBloc, FolderState>(
       builder: (context, state) {
         if (state is FolderLoading) {
@@ -121,7 +125,7 @@ class FolderDetailScreen extends StatelessWidget {
             );
           }
           return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 10),
             itemCount: state.filteredContacts.length,
             itemBuilder: (context, index) {
               final contact = state.filteredContacts[index];
@@ -150,8 +154,17 @@ class FolderDetailScreen extends StatelessWidget {
                       LucideIcons.chevronRight,
                       color: AppColors.textMuted,
                     ),
-                    onTap: () {
-                      // Navigate to Contact Detail
+                    onTap: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ContactEditScreen(contact: contact),
+                        ),
+                      );
+                      
+                      if (result == true && context.mounted) {
+                        context.read<FolderBloc>().add(LoadFolderContacts(folder.id));
+                      }
                     },
                   ),
                 ).animate().fadeIn(delay: (index * 50).ms).slideY(begin: 0.1),

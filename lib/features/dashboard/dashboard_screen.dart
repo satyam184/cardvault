@@ -18,6 +18,9 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final horizontalPadding = size.width > 600 ? size.width * 0.1 : 20.0;
+
     return BlocProvider(
       create: (context) =>
           DashboardBloc(repository: sl<ContactRepository>())
@@ -38,10 +41,10 @@ class DashboardScreen extends StatelessWidget {
           child: SafeArea(
             child: CustomScrollView(
               slivers: [
-                _buildAppBar(context),
-                _buildStats(context),
-                _buildFolderHeader(context),
-                _buildFolderGrid(context),
+                _buildAppBar(context, horizontalPadding),
+                _buildStats(context, horizontalPadding),
+                _buildFolderHeader(context, horizontalPadding),
+                _buildFolderGrid(context, horizontalPadding),
               ],
             ),
           ),
@@ -51,10 +54,10 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(BuildContext context, double horizontalPadding) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.fromLTRB(horizontalPadding, 20, horizontalPadding, 20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -78,13 +81,13 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStats(BuildContext context) {
+  Widget _buildStats(BuildContext context, double horizontalPadding) {
     return SliverToBoxAdapter(
       child: BlocBuilder<DashboardBloc, DashboardState>(
         builder: (context, state) {
           final total = state is DashboardLoaded ? state.totalCards : 0;
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 10),
             child: GlassCard(
               padding: const EdgeInsets.all(20),
               child: Row(
@@ -96,7 +99,7 @@ class DashboardScreen extends StatelessWidget {
                     'Total Cards',
                     LucideIcons.creditCard,
                   ),
-                  VerticalDivider(
+                  const VerticalDivider(
                     color: Colors.white10,
                     indent: 20,
                     endIndent: 20,
@@ -122,34 +125,41 @@ class DashboardScreen extends StatelessWidget {
     String label,
     IconData icon,
   ) {
-    return Row(
-      children: [
-        Icon(icon, color: AppColors.primary, size: 24),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              value,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return Expanded(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: AppColors.primary, size: 24),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildFolderHeader(BuildContext context) {
+  Widget _buildFolderHeader(BuildContext context, double horizontalPadding) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 30, 20, 10),
+        padding: EdgeInsets.fromLTRB(horizontalPadding, 30, horizontalPadding, 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -169,7 +179,10 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFolderGrid(BuildContext context) {
+  Widget _buildFolderGrid(BuildContext context, double horizontalPadding) {
+    final size = MediaQuery.of(context).size;
+    final crossAxisCount = size.width > 900 ? 4 : (size.width > 600 ? 3 : 2);
+
     return BlocBuilder<DashboardBloc, DashboardState>(
       builder: (context, state) {
         if (state is DashboardLoading) {
@@ -179,10 +192,10 @@ class DashboardScreen extends StatelessWidget {
         }
         if (state is DashboardLoaded) {
           return SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
             sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
                 mainAxisSpacing: 15,
                 crossAxisSpacing: 15,
                 childAspectRatio: 1.1,

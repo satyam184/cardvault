@@ -27,6 +27,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isTablet = size.width > 600;
+    final logoSize = isTablet ? 100.0 : 60.0;
+    final fontSize = isTablet ? 48.0 : 32.0;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -37,15 +42,15 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             // Background Glow
             Container(
-                  width: 200,
-                  height: 200,
+                  width: isTablet ? 300 : 200,
+                  height: isTablet ? 300 : 200,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
                         color: AppColors.primary.withOpacity(0.15),
-                        blurRadius: 100,
-                        spreadRadius: 50,
+                        blurRadius: isTablet ? 150 : 100,
+                        spreadRadius: isTablet ? 75 : 50,
                       ),
                     ],
                   ),
@@ -65,10 +70,10 @@ class _SplashScreenState extends State<SplashScreen> {
               children: [
                 // Logo Container
                 Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: EdgeInsets.all(isTablet ? 30 : 20),
                       decoration: BoxDecoration(
                         color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(isTablet ? 32 : 24),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.05),
                           width: 1,
@@ -81,9 +86,9 @@ class _SplashScreenState extends State<SplashScreen> {
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         LucideIcons.wallet,
-                        size: 60,
+                        size: logoSize,
                         color: AppColors.primary,
                       ),
                     )
@@ -102,6 +107,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 Text(
                       'CardVault',
                       style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                        fontSize: fontSize,
                         letterSpacing: 2,
                         fontWeight: FontWeight.w900,
                       ),
@@ -120,6 +126,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 // Tagline
                 Text(
                   'Your Premium Business Hub',
+                  textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.textSecondary.withOpacity(0.7),
                     letterSpacing: 1.2,
