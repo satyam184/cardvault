@@ -43,7 +43,7 @@ class _FoldersListScreenState extends State<FoldersListScreen> {
     try {
       final newFolders = await sl<ContactRepository>().getFolders(
         page: _currentPage,
-        limit: 10,
+        limit: 15,
       );
 
       setState(() {
@@ -53,7 +53,7 @@ class _FoldersListScreenState extends State<FoldersListScreen> {
         } else {
           _folders.addAll(newFolders);
           _currentPage++;
-          if (newFolders.length < 10) {
+          if (newFolders.length < 15) {
             _hasMore = false;
           }
         }
