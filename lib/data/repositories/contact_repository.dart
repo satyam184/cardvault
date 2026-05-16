@@ -74,6 +74,38 @@ class ContactRepository {
 
   List<BusinessContact> get contacts => List.unmodifiable(_contacts);
 
+  Future<List<BusinessContact>> getContacts({
+    int page = 1,
+    int limit = 15,
+    String? folderId,
+    String? search,
+  }) async {
+    try {
+      final Map<String, dynamic> queryParams = {
+        'page': page,
+        'limit': limit,
+      };
+      if (folderId != null) queryParams['folderId'] = folderId;
+      if (search != null && search.isNotEmpty) queryParams['search'] = search;
+
+      final response = await _dioClient.dio.get(
+        '/api/contacts',
+        queryParameters: queryParams,
+      );
+
+      if (response.data is Map && response.data.containsKey('contacts')) {
+        final List contactsJson = response.data['contacts'];
+        return contactsJson.map((json) => BusinessContact.fromJson(json)).toList();
+      } else if (response.data is List) {
+        return (response.data as List).map((json) => BusinessContact.fromJson(json)).toList();
+      } else {
+        throw Exception('Unexpected API response format');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<BusinessContact> createContact(BusinessContact contact, String folderId) async {
     try {
       final response = await _dioClient.dio.post(

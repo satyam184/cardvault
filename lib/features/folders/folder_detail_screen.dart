@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -75,23 +76,44 @@ class FolderDetailScreen extends StatelessWidget {
   }
 }
 
-class _SearchBar extends StatelessWidget {
+class _SearchBar extends StatefulWidget {
   final double horizontalPadding;
 
   const _SearchBar({required this.horizontalPadding});
 
   @override
+  State<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends State<_SearchBar> {
+  Timer? _debounce;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        context.read<FolderBloc>().add(SearchContacts(query));
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: widget.horizontalPadding, vertical: 20),
       child: BlocBuilder<FolderBloc, FolderState>(
         builder: (context, state) {
           return GlassCard(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             borderRadius: 15,
             child: TextField(
-              onChanged: (value) =>
-                  context.read<FolderBloc>().add(SearchContacts(value)),
+              onChanged: _onSearchChanged,
               decoration: const InputDecoration(
                 icon: Icon(
                   LucideIcons.search,
@@ -111,7 +133,7 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-class _ContactList extends StatelessWidget {
+class _ContactList extends StatefulWidget {
   final double horizontalPadding;
   final ContactFolder folder;
 
@@ -121,11 +143,54 @@ class _ContactList extends StatelessWidget {
   });
 
   @override
+  State<_ContactList> createState() => _ContactListState();
+}
+
+class _ContactListState extends State<_ContactList> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<FolderBloc>().add(LoadMoreContacts(widget.folder.id));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<FolderBloc, FolderState>(
       builder: (context, state) {
         if (state is FolderLoading) {
           return const Center(child: CircularProgressIndicator());
+        }
+        if (state is FolderError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(LucideIcons.alertCircle, color: Colors.redAccent, size: 48),
+                const SizedBox(height: 16),
+                Text(state.message, style: const TextStyle(color: Colors.redAccent)),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () => context.read<FolderBloc>().add(LoadFolderContacts(widget.folder.id)),
+                  child: const Text('Retry'),
+                )
+              ],
+            ),
+          );
         }
         if (state is FolderLoaded) {
           if (state.filteredContacts.isEmpty) {
@@ -147,52 +212,75 @@ class _ContactList extends StatelessWidget {
               ),
             );
           }
-          return ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 10),
-            itemCount: state.filteredContacts.length,
-            itemBuilder: (context, index) {
-              final contact = state.filteredContacts[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 15),
-                child: GlassCard(
-                  padding: const EdgeInsets.all(12),
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      backgroundColor: AppColors.primary.withOpacity(0.2),
-                      child: Text(
-                        contact.name[0],
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
+          return RefreshIndicator(
+            onRefresh: () async {
+              context.read<FolderBloc>().add(LoadFolderContacts(widget.folder.id));
+            },
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: EdgeInsets.symmetric(
+                  horizontal: widget.horizontalPadding, vertical: 10),
+              itemCount: state.hasReachedMax
+                  ? state.filteredContacts.length
+                  : state.filteredContacts.length + 1,
+              itemBuilder: (context, index) {
+                if (index >= state.filteredContacts.length) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                
+                final contact = state.filteredContacts[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 15),
+                  child: GlassCard(
+                    padding: const EdgeInsets.all(12),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.primary.withOpacity(0.2),
+                        child: Text(
+                          contact.name.isNotEmpty ? contact.name[0].toUpperCase() : '?',
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                      title: Text(
+                        contact.name.isNotEmpty ? contact.name : 'No Name',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        (contact.company != null && contact.company!.isNotEmpty)
+                            ? contact.company!
+                            : 'No Company',
+                      ),
+                      trailing: const Icon(
+                        LucideIcons.chevronRight,
+                        color: AppColors.textMuted,
+                      ),
+                      onTap: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ContactEditScreen(contact: contact),
+                          ),
+                        );
+
+                        if (result == true && context.mounted) {
+                          context.read<FolderBloc>().add(LoadFolderContacts(widget.folder.id));
+                        }
+                      },
                     ),
-                    title: Text(
-                      contact.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(contact.company ?? 'No Company'),
-                    trailing: const Icon(
-                      LucideIcons.chevronRight,
-                      color: AppColors.textMuted,
-                    ),
-                    onTap: () async {
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ContactEditScreen(contact: contact),
-                        ),
-                      );
-                      
-                      if (result == true && context.mounted) {
-                        context.read<FolderBloc>().add(LoadFolderContacts(folder.id));
-                      }
-                    },
-                  ),
-                ).animate().fadeIn(delay: (index * 50).ms).slideY(begin: 0.1),
-              );
-            },
+                  ).animate().fadeIn(delay: (index % 10 * 50).ms).slideY(begin: 0.1),
+                );
+              },
+            ),
           );
         }
         return const SizedBox();

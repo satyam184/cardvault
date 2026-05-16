@@ -19,3 +19,10 @@ class SearchContacts extends FolderEvent {
   @override
   List<Object?> get props => [query];
 }
+
+class LoadMoreContacts extends FolderEvent {
+  final String folderId;
+  LoadMoreContacts(this.folderId);
+  @override
+  List<Object?> get props => [folderId];
+}
