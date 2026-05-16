@@ -150,4 +150,11 @@ class ContactRepository {
     }
   }
 
+  Future<void> deleteContact(String contactId) async {
+    try {
+      await _dioClient.dio.delete('/api/contacts/$contactId');
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
