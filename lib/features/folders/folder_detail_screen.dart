@@ -19,10 +19,17 @@ import 'bloc/folder_bloc.dart';
 import 'bloc/folder_event.dart';
 import 'bloc/folder_state.dart';
 
-class FolderDetailScreen extends StatelessWidget {
+class FolderDetailScreen extends StatefulWidget {
   final ContactFolder folder;
 
   const FolderDetailScreen({super.key, required this.folder});
+
+  @override
+  State<FolderDetailScreen> createState() => _FolderDetailScreenState();
+}
+
+class _FolderDetailScreenState extends State<FolderDetailScreen> {
+  bool _isExporting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -32,17 +39,31 @@ class FolderDetailScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) =>
           FolderBloc(repository: sl<ContactRepository>())
-            ..add(LoadFolderContacts(folder.id)),
+            ..add(LoadFolderContacts(widget.folder.id)),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(folder.name),
+          title: Text(widget.folder.name),
           actions: [
             BlocBuilder<FolderBloc, FolderState>(
               builder: (context, state) {
+                if (_isExporting) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
+                  );
+                }
                 return IconButton(
                   icon: const Icon(LucideIcons.download),
                   onPressed: state is FolderLoaded
-                      ? () => _exportFolder(context, folder.id)
+                      ? () => _exportFolder(context, widget.folder.id)
                       : null,
                 );
               },
@@ -66,7 +87,7 @@ class FolderDetailScreen extends StatelessWidget {
               Expanded(
                 child: _ContactList(
                   horizontalPadding: horizontalPadding,
-                  folder: folder,
+                  folder: widget.folder,
                 ),
               ),
             ],
@@ -77,6 +98,11 @@ class FolderDetailScreen extends StatelessWidget {
   }
 
   Future<void> _exportFolder(BuildContext context, String folderId) async {
+    if (_isExporting) return;
+    setState(() {
+      _isExporting = true;
+    });
+
     try {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Generating Excel sheet...')),
@@ -119,6 +145,12 @@ class FolderDetailScreen extends StatelessWidget {
             backgroundColor: Colors.redAccent,
           ),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isExporting = false;
+        });
       }
     }
   }
