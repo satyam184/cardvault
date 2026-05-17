@@ -203,7 +203,7 @@ class _SearchBarState extends State<_SearchBar> {
                   color: AppColors.textSecondary,
                   size: 20,
                 ),
-                hintText: 'Search contacts...',
+                hintText: 'Search cards...',
                 border: InputBorder.none,
                 focusedBorder: InputBorder.none,
               ),
@@ -257,7 +257,7 @@ class _ContactListState extends State<_ContactList> {
       builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.surface,
         title: const Text(
-          'Delete Contact',
+          'Delete Card',
           style: TextStyle(color: AppColors.textPrimary),
         ),
         content: Text(
@@ -294,7 +294,7 @@ class _ContactListState extends State<_ContactList> {
         context.read<FolderBloc>().add(LoadFolderContacts(widget.folder.id));
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Contact deleted successfully!'),
+            content: Text('Card deleted successfully!'),
             backgroundColor: AppColors.secondary,
           ),
         );
@@ -357,7 +357,7 @@ class _ContactListState extends State<_ContactList> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No contacts found',
+                    'No cards found',
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ],

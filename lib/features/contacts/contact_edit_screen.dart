@@ -66,7 +66,7 @@ class _ContactEditScreenState extends State<ContactEditScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Contact updated successfully!'),
+              content: Text('Card updated successfully!'),
               backgroundColor: AppColors.secondary,
             ),
           );
@@ -77,7 +77,7 @@ class _ContactEditScreenState extends State<ContactEditScreen> {
           setState(() => _isSaving = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to update contact: $e'),
+              content: Text('Failed to update card: $e'),
               backgroundColor: Colors.redAccent,
             ),
           );
@@ -93,7 +93,7 @@ class _ContactEditScreenState extends State<ContactEditScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Contact'),
+        title: const Text('Edit Card'),
         actions: [
           if (_isSaving)
             const Padding(
@@ -155,7 +155,7 @@ class _ContactEditScreenState extends State<ContactEditScreen> {
                 ], isTablet),
 
                 const SizedBox(height: 30),
-                _buildSectionHeader('Contact Details', LucideIcons.phone),
+                _buildSectionHeader('Card Details', LucideIcons.phone),
                 const SizedBox(height: 15),
                 _buildResponsiveGrid([
                   _buildTextField(

@@ -150,7 +150,7 @@ class _ResultScreenState extends State<ResultScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Contact saved successfully!'),
+            content: Text('Card saved successfully!'),
             backgroundColor: AppColors.secondary,
           ),
         );
@@ -163,7 +163,7 @@ class _ResultScreenState extends State<ResultScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save contact: $e'),
+            content: Text('Failed to save card: $e'),
             backgroundColor: Colors.redAccent,
           ),
         );
