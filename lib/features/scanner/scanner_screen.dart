@@ -53,6 +53,25 @@ class _ScannerScreenState extends State<ScannerScreen> {
     super.dispose();
   }
 
+  Future<void> _capture(BuildContext context, ScannerState state) async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+
+    final bloc = context.read<ScannerBloc>();
+    final image = await _controller!.takePicture();
+    if (!mounted) return;
+
+    bool capturingFront = true;
+    if (state is ScannerCapturing) {
+      capturingFront = !state.isFrontCaptured;
+    }
+
+    if (capturingFront) {
+      bloc.add(CaptureFront(image));
+    } else {
+      bloc.add(CaptureBack(image));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -90,7 +109,14 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
                 const CameraOverlay(),
 
-                _buildUI(context, state),
+                ScannerUIOverlay(
+                  state: state,
+                  onClosePressed: () => Navigator.pop(context),
+                  onCapturePressed: () => _capture(context, state),
+                  onConfirmPressed: () {
+                    context.read<ScannerBloc>().add(StartAnalysis());
+                  },
+                ),
               ],
             ),
           );
@@ -98,11 +124,28 @@ class _ScannerScreenState extends State<ScannerScreen> {
       ),
     );
   }
+}
 
-  Widget _buildUI(BuildContext context, ScannerState state) {
+class ScannerUIOverlay extends StatelessWidget {
+  final ScannerState state;
+  final VoidCallback onClosePressed;
+  final VoidCallback onCapturePressed;
+  final VoidCallback onConfirmPressed;
+
+  const ScannerUIOverlay({
+    super.key,
+    required this.state,
+    required this.onClosePressed,
+    required this.onCapturePressed,
+    required this.onConfirmPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     bool capturingFront = true;
-    if (state is ScannerCapturing) {
-      capturingFront = !state.isFrontCaptured;
+    final currentState = state;
+    if (currentState is ScannerCapturing) {
+      capturingFront = !currentState.isFrontCaptured;
     }
 
     return SafeArea(
@@ -115,7 +158,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
               children: [
                 IconButton(
                   icon: const Icon(LucideIcons.x, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: onClosePressed,
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -140,21 +183,32 @@ class _ScannerScreenState extends State<ScannerScreen> {
           ),
           const Spacer(),
           if (state is ScannerAnalyzing)
-            _buildAnalyzingOverlay(state.message)
+            AnalyzingOverlay(message: (state as ScannerAnalyzing).message)
           else
-            _buildControls(context, state),
+            ScannerControls(
+              state: state,
+              onCapturePressed: onCapturePressed,
+              onConfirmPressed: onConfirmPressed,
+            ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildAnalyzingOverlay(String message) {
+class AnalyzingOverlay extends StatelessWidget {
+  final String message;
+
+  const AnalyzingOverlay({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(40),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.black87,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -170,13 +224,28 @@ class _ScannerScreenState extends State<ScannerScreen> {
       ),
     ).animate().slideY(begin: 1);
   }
+}
 
-  Widget _buildControls(BuildContext context, ScannerState state) {
+class ScannerControls extends StatelessWidget {
+  final ScannerState state;
+  final VoidCallback onCapturePressed;
+  final VoidCallback onConfirmPressed;
+
+  const ScannerControls({
+    super.key,
+    required this.state,
+    required this.onCapturePressed,
+    required this.onConfirmPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     bool isFrontCaptured = false;
     bool isBackCaptured = false;
-    if (state is ScannerCapturing) {
-      isFrontCaptured = state.isFrontCaptured;
-      isBackCaptured = state.isBackCaptured;
+    final currentState = state;
+    if (currentState is ScannerCapturing) {
+      isFrontCaptured = currentState.isFrontCaptured;
+      isBackCaptured = currentState.isBackCaptured;
     }
 
     return Container(
@@ -195,9 +264,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildThumbnail('Front', isFrontCaptured),
+              ThumbnailPreview(label: 'Front', isCaptured: isFrontCaptured),
               const SizedBox(width: 20),
-              _buildThumbnail('Back', isBackCaptured),
+              ThumbnailPreview(label: 'Back', isCaptured: isBackCaptured),
             ],
           ),
           const SizedBox(height: 30),
@@ -210,10 +279,12 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   color: Colors.white,
                   size: 30,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  // Gallery selection feature can be integrated here
+                },
               ),
               GestureDetector(
-                onTap: () => _capture(context, state),
+                onTap: onCapturePressed,
                 child: Container(
                   width: 80,
                   height: 80,
@@ -240,9 +311,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                     color: AppColors.primary,
                     size: 30,
                   ),
-                  onPressed: () {
-                    context.read<ScannerBloc>().add(StartAnalysis());
-                  },
+                  onPressed: onConfirmPressed,
                 )
               else
                 const SizedBox(width: 48),
@@ -252,8 +321,20 @@ class _ScannerScreenState extends State<ScannerScreen> {
       ),
     );
   }
+}
 
-  Widget _buildThumbnail(String label, bool isCaptured) {
+class ThumbnailPreview extends StatelessWidget {
+  final String label;
+  final bool isCaptured;
+
+  const ThumbnailPreview({
+    super.key,
+    required this.label,
+    required this.isCaptured,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
@@ -281,24 +362,5 @@ class _ScannerScreenState extends State<ScannerScreen> {
         ),
       ],
     );
-  }
-
-  Future<void> _capture(BuildContext context, ScannerState state) async {
-    if (!_controller!.value.isInitialized) return;
-
-    final bloc = context.read<ScannerBloc>();
-    final image = await _controller!.takePicture();
-    if (!mounted) return;
-
-    bool capturingFront = true;
-    if (state is ScannerCapturing) {
-      capturingFront = !state.isFrontCaptured;
-    }
-
-    if (capturingFront) {
-      bloc.add(CaptureFront(image));
-    } else {
-      bloc.add(CaptureBack(image));
-    }
   }
 }
