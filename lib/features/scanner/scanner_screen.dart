@@ -105,7 +105,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   valueListenable: _isInitialized,
                   builder: (context, isInitialized, _) {
                     if (isInitialized) {
-                      return Positioned.fill(child: CameraPreview(_controller!));
+                      return Positioned.fill(
+                        child: CameraPreview(_controller!),
+                      );
                     }
                     return const Center(child: CircularProgressIndicator());
                   },
