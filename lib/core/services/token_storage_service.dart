@@ -9,6 +9,10 @@ class TokenStorageService {
   static const String _refreshTokenKey = 'refresh_token';
   static const String _userKey = 'user_data';
 
+  static const String _rememberMeKey = 'remember_me';
+  static const String _savedEmailKey = 'saved_email';
+  static const String _savedPasswordKey = 'saved_password';
+
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
@@ -29,7 +33,39 @@ class TokenStorageService {
     return await _storage.read(key: _refreshTokenKey);
   }
 
+  Future<void> saveRememberMe({
+    required bool rememberMe,
+    required String email,
+    required String password,
+  }) async {
+    await _storage.write(key: _rememberMeKey, value: rememberMe.toString());
+    if (rememberMe) {
+      await _storage.write(key: _savedEmailKey, value: email);
+      await _storage.write(key: _savedPasswordKey, value: password);
+    } else {
+      await _storage.delete(key: _savedEmailKey);
+      await _storage.delete(key: _savedPasswordKey);
+    }
+  }
+
+  Future<bool> getRememberMeStatus() async {
+    final value = await _storage.read(key: _rememberMeKey);
+    // By default remember me is selected, so if there is no stored value, return true.
+    if (value == null) return true;
+    return value == 'true';
+  }
+
+  Future<String?> getSavedEmail() async {
+    return await _storage.read(key: _savedEmailKey);
+  }
+
+  Future<String?> getSavedPassword() async {
+    return await _storage.read(key: _savedPasswordKey);
+  }
+
   Future<void> clearAll() async {
-    await _storage.deleteAll();
+    await _storage.delete(key: _accessTokenKey);
+    await _storage.delete(key: _refreshTokenKey);
+    await _storage.delete(key: _userKey);
   }
 }
