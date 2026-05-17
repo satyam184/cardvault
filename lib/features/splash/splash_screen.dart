@@ -23,8 +23,8 @@ class _SplashScreenState extends State<SplashScreen> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) async {
         // We still want a minimum delay for the premium splash feel
-        await Future.delayed(const Duration(seconds: 2));
-        
+        await Future.delayed(const Duration(milliseconds: 1500));
+
         if (state.status == AuthStatus.authenticated) {
           if (context.mounted) {
             Navigator.pushReplacementNamed(context, '/dashboard');
@@ -76,7 +76,9 @@ class _SplashScreenState extends State<SplashScreen> {
                         padding: EdgeInsets.all(isTablet ? 30 : 20),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(isTablet ? 32 : 24),
+                          borderRadius: BorderRadius.circular(
+                            isTablet ? 32 : 24,
+                          ),
                           border: Border.all(
                             color: Colors.white.withOpacity(0.05),
                             width: 1,
@@ -109,11 +111,12 @@ class _SplashScreenState extends State<SplashScreen> {
                   // App Name
                   Text(
                         'CardVault',
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                          fontSize: fontSize,
-                          letterSpacing: 2,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        style: Theme.of(context).textTheme.displayLarge
+                            ?.copyWith(
+                              fontSize: fontSize,
+                              letterSpacing: 2,
+                              fontWeight: FontWeight.w900,
+                            ),
                       )
                       .animate()
                       .fadeIn(delay: 400.ms, duration: 800.ms)

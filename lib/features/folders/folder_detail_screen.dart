@@ -1,22 +1,23 @@
 import 'dart:async';
-import '../../data/models/contact_model.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../contacts/contact_edit_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/common_widgets/glass_card.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/utils/excel_service.dart';
 import '../../core/utils/injection.dart';
+import '../../data/models/contact_model.dart';
 import '../../data/models/folder_model.dart';
 import '../../data/repositories/contact_repository.dart';
+import '../contacts/contact_edit_screen.dart';
+import '../dashboard/bloc/dashboard_bloc.dart';
+import '../dashboard/bloc/dashboard_event.dart';
 import 'bloc/folder_bloc.dart';
 import 'bloc/folder_event.dart';
 import 'bloc/folder_state.dart';
-import '../dashboard/bloc/dashboard_bloc.dart';
-import '../dashboard/bloc/dashboard_event.dart';
 
 class FolderDetailScreen extends StatelessWidget {
   final ContactFolder folder;
@@ -41,10 +42,7 @@ class FolderDetailScreen extends StatelessWidget {
                 return IconButton(
                   icon: const Icon(LucideIcons.download),
                   onPressed: state is FolderLoaded
-                      ? () => sl<ExcelService>().exportContacts(
-                          state.contacts,
-                          folderName: folder.name,
-                        )
+                      ? () => _exportFolder(context, folder.id)
                       : null,
                 );
               },
@@ -76,6 +74,53 @@ class FolderDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _exportFolder(BuildContext context, String folderId) async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Generating Excel sheet...')),
+      );
+      final url = await sl<ContactRepository>().exportFolder(folderId);
+      debugPrint("excel url: $url");
+      final uri = Uri.parse(url);
+      
+      bool launched = false;
+      if (await canLaunchUrl(uri)) {
+        launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        // Fallback: try launching directly anyway, as canLaunchUrl is notorious
+        // for returning false on Android 11+ / iOS even if the URL can be launched.
+        try {
+          launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } catch (e) {
+          debugPrint('DEBUG: Fallback external application launch failed: $e. Trying default launch.');
+          launched = await launchUrl(uri);
+        }
+      }
+
+      if (launched) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Download started!'),
+              backgroundColor: AppColors.secondary,
+            ),
+          );
+        }
+      } else {
+        throw Exception('Could not launch browser for download.');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to export: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
   }
 }
 

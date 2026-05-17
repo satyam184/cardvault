@@ -170,4 +170,20 @@ class ContactRepository {
       rethrow;
     }
   }
+
+  Future<String> exportFolder(String folderId) async {
+    try {
+      final response = await _dioClient.dio.get('/api/export/folder/$folderId');
+      if (response.data['fileUrl'] != null) {
+        String fileUrl = response.data['fileUrl'];
+        if (fileUrl.contains('localhost:5000')) {
+          fileUrl = fileUrl.replaceFirst(RegExp(r'http://localhost:\d+'), _dioClient.baseUrl);
+        }
+        return fileUrl;
+      }
+      throw Exception('Export failed: Invalid response format');
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
