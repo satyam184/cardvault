@@ -23,9 +23,17 @@ class ResultScreen extends StatefulWidget {
 
 class _ResultScreenState extends State<ResultScreen> {
   late TextEditingModel _model;
-  String? _selectedFolderId;
-  List<ContactFolder> _folders = [];
-  bool _isSaving = false;
+  final _selectedFolderId = ValueNotifier<String?>(null);
+  final _folders = ValueNotifier<List<ContactFolder>>([]);
+  final _isSaving = ValueNotifier<bool>(false);
+
+  @override
+  void dispose() {
+    _selectedFolderId.dispose();
+    _folders.dispose();
+    _isSaving.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -38,12 +46,10 @@ class _ResultScreenState extends State<ResultScreen> {
     try {
       final folders = await sl<ContactRepository>().getFoldersList();
       if (mounted) {
-        setState(() {
-          _folders = folders;
-          if (_folders.isNotEmpty) {
-            _selectedFolderId = _folders.first.id;
-          }
-        });
+        _folders.value = folders;
+        if (folders.isNotEmpty) {
+          _selectedFolderId.value = folders.first.id;
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -63,21 +69,26 @@ class _ResultScreenState extends State<ResultScreen> {
       appBar: AppBar(
         title: const Text('Review Details'),
         actions: [
-          TextButton(
-            onPressed: _isSaving ? null : _saveContact,
-            child: _isSaving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text(
-                    'Save',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+          ValueListenableBuilder<bool>(
+            valueListenable: _isSaving,
+            builder: (context, isSaving, _) {
+              return TextButton(
+                onPressed: isSaving ? null : _saveContact,
+                child: isSaving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(
+                        'Save',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              );
+            },
           ),
         ],
       ),
@@ -111,16 +122,14 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Future<void> _saveContact() async {
-    if (_selectedFolderId == null) {
+    if (_selectedFolderId.value == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select or create a folder first')),
       );
       return;
     }
 
-    setState(() {
-      _isSaving = true;
-    });
+    _isSaving.value = true;
 
     final newContact = BusinessContact(
       id: widget.contact.id,
@@ -131,7 +140,7 @@ class _ResultScreenState extends State<ResultScreen> {
       phone: _model.phone.text,
       website: _model.website.text,
       address: _model.address.text,
-      folderId: _selectedFolderId!,
+      folderId: _selectedFolderId.value!,
       frontImagePath: widget.contact.frontImagePath,
       backImagePath: widget.contact.backImagePath,
       createdAt: widget.contact.createdAt,
@@ -140,7 +149,7 @@ class _ResultScreenState extends State<ResultScreen> {
     try {
       await sl<ContactRepository>().createContact(
         newContact,
-        _selectedFolderId!,
+        _selectedFolderId.value!,
       );
 
       if (mounted) {
@@ -158,9 +167,7 @@ class _ResultScreenState extends State<ResultScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
+        _isSaving.value = false;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to save card: $e'),
@@ -172,33 +179,43 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Widget _buildFolderDropdown() {
-    return GlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      borderRadius: 15,
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedFolderId,
-          isExpanded: true,
-          dropdownColor: AppColors.surface,
-          icon: const Icon(LucideIcons.chevronDown, color: AppColors.primary),
-          items: _folders
-              .map(
-                (f) => DropdownMenuItem(
-                  value: f.id,
-                  child: Text(
-                    f.name,
-                    style: const TextStyle(color: Colors.white),
+    return ValueListenableBuilder<String?>(
+      valueListenable: _selectedFolderId,
+      builder: (context, selectedFolderId, _) {
+        return ValueListenableBuilder<List<ContactFolder>>(
+          valueListenable: _folders,
+          builder: (context, folders, _) {
+            return GlassCard(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              borderRadius: 15,
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedFolderId,
+                  isExpanded: true,
+                  dropdownColor: AppColors.surface,
+                  icon: const Icon(LucideIcons.chevronDown, color: AppColors.primary),
+                  items: folders
+                      .map(
+                        (f) => DropdownMenuItem(
+                          value: f.id,
+                          child: Text(
+                            f.name,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (val) => _selectedFolderId.value = val,
+                  hint: const Text(
+                    'Select Folder',
+                    style: TextStyle(color: AppColors.textSecondary),
                   ),
                 ),
-              )
-              .toList(),
-          onChanged: (val) => setState(() => _selectedFolderId = val),
-          hint: const Text(
-            'Select Folder',
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
-        ),
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

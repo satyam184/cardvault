@@ -19,7 +19,7 @@ class ContactEditScreen extends StatefulWidget {
 class _ContactEditScreenState extends State<ContactEditScreen> {
   final _formKey = GlobalKey<FormState>();
   late Map<String, TextEditingController> _controllers;
-  bool _isSaving = false;
+  final _isSaving = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -41,12 +41,13 @@ class _ContactEditScreenState extends State<ContactEditScreen> {
     for (var controller in _controllers.values) {
       controller.dispose();
     }
+    _isSaving.dispose();
     super.dispose();
   }
 
   Future<void> _saveContact() async {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isSaving = true);
+      _isSaving.value = true;
 
       final updateData = {
         'folderId': widget.contact.folderId,
@@ -74,7 +75,7 @@ class _ContactEditScreenState extends State<ContactEditScreen> {
         }
       } catch (e) {
         if (mounted) {
-          setState(() => _isSaving = false);
+          _isSaving.value = false;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Failed to update card: $e'),
@@ -95,22 +96,27 @@ class _ContactEditScreenState extends State<ContactEditScreen> {
       appBar: AppBar(
         title: const Text('Edit Card'),
         actions: [
-          if (_isSaving)
-            const Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: Center(
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            )
-          else
-            IconButton(
-              icon: const Icon(LucideIcons.save, color: AppColors.primary),
-              onPressed: _saveContact,
-            ),
+          ValueListenableBuilder<bool>(
+            valueListenable: _isSaving,
+            builder: (context, isSaving, _) {
+              if (isSaving) {
+                return const Padding(
+                  padding: EdgeInsets.only(right: 20.0),
+                  child: Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                );
+              }
+              return IconButton(
+                icon: const Icon(LucideIcons.save, color: AppColors.primary),
+                onPressed: _saveContact,
+              );
+            },
+          ),
         ],
       ),
       body: Container(

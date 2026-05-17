@@ -22,7 +22,7 @@ class ScannerScreen extends StatefulWidget {
 
 class _ScannerScreenState extends State<ScannerScreen> {
   CameraController? _controller;
-  bool _isInitialized = false;
+  final _isInitialized = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -41,15 +41,14 @@ class _ScannerScreenState extends State<ScannerScreen> {
     );
     await _controller!.initialize();
     if (mounted) {
-      setState(() {
-        _isInitialized = true;
-      });
+      _isInitialized.value = true;
     }
   }
 
   @override
   void dispose() {
     _controller?.dispose();
+    _isInitialized.dispose();
     super.dispose();
   }
 
@@ -102,10 +101,15 @@ class _ScannerScreenState extends State<ScannerScreen> {
             backgroundColor: Colors.black,
             body: Stack(
               children: [
-                if (_isInitialized)
-                  Positioned.fill(child: CameraPreview(_controller!))
-                else
-                  const Center(child: CircularProgressIndicator()),
+                ValueListenableBuilder<bool>(
+                  valueListenable: _isInitialized,
+                  builder: (context, isInitialized, _) {
+                    if (isInitialized) {
+                      return Positioned.fill(child: CameraPreview(_controller!));
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                ),
 
                 const CameraOverlay(),
 

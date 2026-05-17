@@ -29,7 +29,13 @@ class FolderDetailScreen extends StatefulWidget {
 }
 
 class _FolderDetailScreenState extends State<FolderDetailScreen> {
-  bool _isExporting = false;
+  final _isExporting = ValueNotifier<bool>(false);
+
+  @override
+  void dispose() {
+    _isExporting.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,27 +50,32 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
         appBar: AppBar(
           title: Text(widget.folder.name),
           actions: [
-            BlocBuilder<FolderBloc, FolderState>(
-              builder: (context, state) {
-                if (_isExporting) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Center(
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
+            ValueListenableBuilder<bool>(
+              valueListenable: _isExporting,
+              builder: (context, isExporting, _) {
+                return BlocBuilder<FolderBloc, FolderState>(
+                  builder: (context, state) {
+                    if (isExporting) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                }
-                return IconButton(
-                  icon: const Icon(LucideIcons.download),
-                  onPressed: state is FolderLoaded
-                      ? () => _exportFolder(context, widget.folder.id)
-                      : null,
+                      );
+                    }
+                    return IconButton(
+                      icon: const Icon(LucideIcons.download),
+                      onPressed: state is FolderLoaded
+                          ? () => _exportFolder(context, widget.folder.id)
+                          : null,
+                    );
+                  },
                 );
               },
             ),
@@ -98,10 +109,8 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
   }
 
   Future<void> _exportFolder(BuildContext context, String folderId) async {
-    if (_isExporting) return;
-    setState(() {
-      _isExporting = true;
-    });
+    if (_isExporting.value) return;
+    _isExporting.value = true;
 
     try {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -148,9 +157,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isExporting = false;
-        });
+        _isExporting.value = false;
       }
     }
   }

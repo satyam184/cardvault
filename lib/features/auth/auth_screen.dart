@@ -17,8 +17,8 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  bool isLogin = true;
-  bool rememberMe = true;
+  final _isLogin = ValueNotifier<bool>(true);
+  final _rememberMe = ValueNotifier<bool>(true);
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
@@ -33,9 +33,7 @@ class _AuthScreenState extends State<AuthScreen> {
     try {
       final tokenService = sl<TokenStorageService>();
       final isRemembered = await tokenService.getRememberMeStatus();
-      setState(() {
-        rememberMe = isRemembered;
-      });
+      _rememberMe.value = isRemembered;
       if (isRemembered) {
         final email = await tokenService.getSavedEmail();
         final password = await tokenService.getSavedPassword();
@@ -52,6 +50,8 @@ class _AuthScreenState extends State<AuthScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
+    _isLogin.dispose();
+    _rememberMe.dispose();
     super.dispose();
   }
 
@@ -122,7 +122,7 @@ class _AuthScreenState extends State<AuthScreen> {
           if (state.status == LoginStatus.success) {
             // Save remember me details on successful login
             sl<TokenStorageService>().saveRememberMe(
-              rememberMe: rememberMe,
+              rememberMe: _rememberMe.value,
               email: _emailController.text,
               password: _passwordController.text,
             );
@@ -169,62 +169,68 @@ class _AuthScreenState extends State<AuthScreen> {
                               .fadeIn()
                               .scale(),
                           const SizedBox(height: 20),
-                          Text(
-                            isLogin ? 'Welcome Back' : 'Create Account',
-                            style: Theme.of(context).textTheme.displayLarge,
-                          ).animate().fadeIn(delay: 200.ms).slideX(),
-                          Text(
-                            isLogin ? 'Sign in to continue' : 'Join CardVault today',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ).animate().fadeIn(delay: 300.ms),
-                          const SizedBox(height: 40),
-                          _AuthForm(
-                            isLogin: isLogin,
-                            rememberMe: rememberMe,
-                            onRememberMeChanged: (val) {
-                              setState(() {
-                                rememberMe = val ?? false;
-                              });
+                          ValueListenableBuilder<bool>(
+                            valueListenable: _isLogin,
+                            builder: (context, isLogin, _) {
+                              return ValueListenableBuilder<bool>(
+                                valueListenable: _rememberMe,
+                                builder: (context, rememberMe, _) {
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        isLogin ? 'Welcome Back' : 'Create Account',
+                                        style: Theme.of(context).textTheme.displayLarge,
+                                      ).animate().fadeIn(delay: 200.ms).slideX(),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        isLogin ? 'Sign in to continue' : 'Join CardVault today',
+                                        style: Theme.of(context).textTheme.bodyMedium,
+                                      ).animate().fadeIn(delay: 300.ms),
+                                      const SizedBox(height: 40),
+                                      _AuthForm(
+                                        isLogin: isLogin,
+                                        rememberMe: rememberMe,
+                                        onRememberMeChanged: (val) {
+                                          _rememberMe.value = val ?? false;
+                                        },
+                                        onForgotPassword: () => _showForgotPasswordDialog(context),
+                                        emailController: _emailController,
+                                        passwordController: _passwordController,
+                                        nameController: _nameController,
+                                        onSubmitted: () {
+                                          final bloc = context.read<LoginBloc>();
+                                          if (isLogin) {
+                                            bloc.add(LoginSubmitted(
+                                              _emailController.text,
+                                              _passwordController.text,
+                                            ));
+                                          } else {
+                                            bloc.add(RegisterSubmitted(
+                                              _nameController.text,
+                                              _emailController.text,
+                                              _passwordController.text,
+                                            ));
+                                          }
+                                        },
+                                      ),
+                                      const SizedBox(height: 30),
+                                      Center(
+                                        child: TextButton(
+                                          onPressed: () => _isLogin.value = !isLogin,
+                                          child: Text(
+                                            isLogin
+                                                ? "Don't have an account? Sign Up"
+                                                : "Already have an account? Login",
+                                            style: const TextStyle(color: AppColors.textSecondary),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             },
-                            onForgotPassword: () => _showForgotPasswordDialog(context),
-                            emailController: _emailController,
-                            passwordController: _passwordController,
-                            nameController: _nameController,
-                            onSubmitted: () {
-                              final bloc = context.read<LoginBloc>();
-                              if (isLogin) {
-                                bloc.add(LoginSubmitted(
-                                  _emailController.text,
-                                  _passwordController.text,
-                                ));
-                              } else {
-                                bloc.add(RegisterSubmitted(
-                                  _nameController.text,
-                                  _emailController.text,
-                                  _passwordController.text,
-                                ));
-                              }
-                            },
-                          ),
-                          
-                          // Commented Social Login / Easy Login section
-                          /*
-                          const SizedBox(height: 30),
-                          const _SocialLoginSection(),
-                          */
-                          
-                          const SizedBox(height: 30),
-                          Center(
-                            child: TextButton(
-                              onPressed: () => setState(() => isLogin = !isLogin),
-                              child: Text(
-                                isLogin
-                                    ? "Don't have an account? Sign Up"
-                                    : "Already have an account? Login",
-                                style:
-                                    const TextStyle(color: AppColors.textSecondary),
-                              ),
-                            ),
                           ),
                         ],
                       ),

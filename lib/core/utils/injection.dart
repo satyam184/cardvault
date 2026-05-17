@@ -11,6 +11,7 @@ import '../../features/dashboard/bloc/dashboard_bloc.dart';
 import 'ocr_service.dart';
 import 'ai_service.dart';
 import 'excel_service.dart';
+import 'connectivity_service.dart';
 
 final sl = GetIt.instance;
 
@@ -30,6 +31,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => OCRService());
   sl.registerLazySingleton(() => AIService());
   sl.registerLazySingleton(() => ExcelService());
+  sl.registerLazySingleton(() => ConnectivityService());
   sl.registerLazySingleton(
     () => TokenStorageService(const FlutterSecureStorage()),
   );
