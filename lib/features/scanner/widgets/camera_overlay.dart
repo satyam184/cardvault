@@ -14,7 +14,7 @@ class CameraOverlay extends StatelessWidget {
         // Darkened background with hole
         ColorFiltered(
           colorFilter: ColorFilter.mode(
-            Colors.black.withOpacity(0.5),
+            Colors.black.withValues(alpha: 0.5),
             BlendMode.srcOut,
           ),
           child: Stack(

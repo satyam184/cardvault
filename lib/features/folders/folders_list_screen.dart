@@ -89,8 +89,8 @@ class _FoldersListScreenState extends State<FoldersListScreen> {
             end: Alignment.bottomRight,
             colors: [
               AppColors.background,
-              AppColors.background.withOpacity(0.8),
-              AppColors.primary.withOpacity(0.05),
+              AppColors.background.withValues(alpha: 0.8),
+              AppColors.primary.withValues(alpha: 0.05),
             ],
           ),
         ),

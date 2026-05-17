@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import '../../../data/models/contact_model.dart';
 
 abstract class FolderEvent extends Equatable {
   @override

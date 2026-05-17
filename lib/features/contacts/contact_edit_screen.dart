@@ -119,7 +119,7 @@ class _ContactEditScreenState extends State<ContactEditScreen> {
             center: Alignment.bottomRight,
             radius: 1.5,
             colors: [
-              AppColors.secondary.withOpacity(0.05),
+              AppColors.secondary.withValues(alpha: 0.05),
               AppColors.background,
             ],
           ),

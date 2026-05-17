@@ -51,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withOpacity(0.15),
+                          color: AppColors.primary.withValues(alpha: 0.15),
                           blurRadius: isTablet ? 150 : 100,
                           spreadRadius: isTablet ? 75 : 50,
                         ),
@@ -80,12 +80,12 @@ class _SplashScreenState extends State<SplashScreen> {
                             isTablet ? 32 : 24,
                           ),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.05),
+                            color: Colors.white.withValues(alpha: 0.05),
                             width: 1,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -134,7 +134,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     'Your Premium Business Hub',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary.withOpacity(0.7),
+                      color: AppColors.textSecondary.withValues(alpha: 0.7),
                       letterSpacing: 1.2,
                     ),
                   ).animate().fadeIn(delay: 800.ms, duration: 800.ms),

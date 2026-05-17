@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../core/network/dio_client.dart';
 import '../models/contact_model.dart';
 import '../models/folder_model.dart';
@@ -28,7 +29,7 @@ class ContactRepository {
         throw Exception('Unexpected API response format');
       }
     } catch (e) {
-      print('DEBUG: getFolders Error: $e');
+      debugPrint('DEBUG: getFolders Error: $e');
       rethrow;
     }
   }

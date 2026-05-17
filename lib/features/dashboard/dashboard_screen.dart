@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../../core/utils/injection.dart';
-import '../../data/repositories/contact_repository.dart';
 import '../auth/bloc/auth_bloc.dart';
 import 'bloc/dashboard_bloc.dart';
-import 'bloc/dashboard_event.dart';
 import 'bloc/dashboard_state.dart';
 import 'widgets/dashboard_app_bar.dart';
 import 'widgets/dashboard_stats.dart';
@@ -47,8 +44,8 @@ class DashboardScreen extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: [
                     AppColors.background,
-                    AppColors.background.withOpacity(0.8),
-                    AppColors.primary.withOpacity(0.05),
+                    AppColors.background.withValues(alpha: 0.8),
+                    AppColors.primary.withValues(alpha: 0.05),
                   ],
                 ),
               ),

@@ -255,7 +255,7 @@ class ScannerControls extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.8)],
         ),
       ),
       child: Column(
@@ -342,7 +342,7 @@ class ThumbnailPreview extends StatelessWidget {
           height: 40,
           decoration: BoxDecoration(
             color: isCaptured
-                ? AppColors.primary.withOpacity(0.5)
+                ? AppColors.primary.withValues(alpha: 0.5)
                 : Colors.white10,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
