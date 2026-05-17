@@ -186,4 +186,16 @@ class ContactRepository {
       rethrow;
     }
   }
+
+  Future<int> getContactStats() async {
+    try {
+      final response = await _dioClient.dio.get('/api/contacts/stats');
+      if (response.data != null && response.data['success'] == true && response.data['totalContacts'] != null) {
+        return response.data['totalContacts'] as int;
+      }
+      return 0;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
