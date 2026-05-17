@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/injection.dart' as di;
 import 'core/utils/injection.dart';
+import 'core/common_widgets/connectivity_wrapper.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/auth/auth_screen.dart';
 import 'features/splash/splash_screen.dart';
@@ -14,13 +15,11 @@ import 'features/dashboard/bloc/dashboard_event.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Load environment variables
+
   await dotenv.load(fileName: ".env");
-  
-  // Initialize Dependency Injection
+
   await di.init();
-  
+
   runApp(const CardVaultApp());
 }
 
@@ -49,9 +48,10 @@ class CardVaultApp extends StatelessWidget {
           '/dashboard': (context) => const DashboardScreen(),
           '/folders': (context) => const FoldersListScreen(),
         },
+        builder: (context, child) {
+          return ConnectivityWrapper(child: child!);
+        },
       ),
     );
   }
 }
-
-// Placeholder removed

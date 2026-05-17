@@ -1,3 +1,4 @@
+import '../constants/api_constants.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../data/repositories/contact_repository.dart';
@@ -35,6 +36,6 @@ Future<void> init() async {
 
   // Core
   sl.registerLazySingleton(
-    () => DioClient(baseUrl: 'http://10.235.48.221:5000', tokenService: sl()),
+    () => DioClient(baseUrl: ApiConstants.baseUrl, tokenService: sl()),
   );
 }
