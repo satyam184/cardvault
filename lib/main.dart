@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/injection.dart' as di;
 import 'core/utils/injection.dart';
@@ -14,13 +18,40 @@ import 'features/dashboard/bloc/dashboard_bloc.dart';
 import 'features/dashboard/bloc/dashboard_event.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  Sentry.init(
+    (options) {
+      options.dsn =
+          'https://ed3de42023614381ba0e53f9770f1de0@o4511405972783104.ingest.us.sentry.io/4511405974028288';
 
-  await dotenv.load(fileName: ".env");
+      options.tracesSampleRate = 1.0;
+    },
+    appRunner: () {
+      runZonedGuarded(
+        () async {
+          WidgetsFlutterBinding.ensureInitialized();
+          await dotenv.load(fileName: ".env");
+          await di.init();
 
-  await di.init();
+          FlutterError.onError = (FlutterErrorDetails details) async {
+            await Sentry.captureException(
+              details.exception,
+              stackTrace: details.stack,
+            );
+          };
 
-  runApp(const CardVaultApp());
+          PlatformDispatcher.instance.onError = (error, stack) {
+            Sentry.captureException(error, stackTrace: stack);
+            return true;
+          };
+
+          runApp(const CardVaultApp());
+        },
+        (error, stack) async {
+          await Sentry.captureException(error, stackTrace: stack);
+        },
+      );
+    },
+  );
 }
 
 class CardVaultApp extends StatelessWidget {
