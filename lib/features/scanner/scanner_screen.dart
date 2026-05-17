@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -71,6 +72,34 @@ class _ScannerScreenState extends State<ScannerScreen> {
     }
   }
 
+  Future<void> _selectFromGallery(BuildContext context, ScannerState state) async {
+    final bloc = context.read<ScannerBloc>();
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final picker = ImagePicker();
+      final image = await picker.pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+
+      bool capturingFront = true;
+      if (state is ScannerCapturing) {
+        capturingFront = !state.isFrontCaptured;
+      }
+
+      if (capturingFront) {
+        bloc.add(CaptureFront(image));
+      } else {
+        bloc.add(CaptureBack(image));
+      }
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Failed to pick image: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -119,6 +148,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   state: state,
                   onClosePressed: () => Navigator.pop(context),
                   onCapturePressed: () => _capture(context, state),
+                  onGalleryPressed: () => _selectFromGallery(context, state),
                   onConfirmPressed: () {
                     context.read<ScannerBloc>().add(StartAnalysis());
                   },
@@ -136,6 +166,7 @@ class ScannerUIOverlay extends StatelessWidget {
   final ScannerState state;
   final VoidCallback onClosePressed;
   final VoidCallback onCapturePressed;
+  final VoidCallback onGalleryPressed;
   final VoidCallback onConfirmPressed;
 
   const ScannerUIOverlay({
@@ -143,6 +174,7 @@ class ScannerUIOverlay extends StatelessWidget {
     required this.state,
     required this.onClosePressed,
     required this.onCapturePressed,
+    required this.onGalleryPressed,
     required this.onConfirmPressed,
   });
 
@@ -194,6 +226,7 @@ class ScannerUIOverlay extends StatelessWidget {
             ScannerControls(
               state: state,
               onCapturePressed: onCapturePressed,
+              onGalleryPressed: onGalleryPressed,
               onConfirmPressed: onConfirmPressed,
             ),
         ],
@@ -235,12 +268,14 @@ class AnalyzingOverlay extends StatelessWidget {
 class ScannerControls extends StatelessWidget {
   final ScannerState state;
   final VoidCallback onCapturePressed;
+  final VoidCallback onGalleryPressed;
   final VoidCallback onConfirmPressed;
 
   const ScannerControls({
     super.key,
     required this.state,
     required this.onCapturePressed,
+    required this.onGalleryPressed,
     required this.onConfirmPressed,
   });
 
@@ -285,9 +320,7 @@ class ScannerControls extends StatelessWidget {
                   color: Colors.white,
                   size: 30,
                 ),
-                onPressed: () {
-                  // Gallery selection feature can be integrated here
-                },
+                onPressed: onGalleryPressed,
               ),
               GestureDetector(
                 onTap: onCapturePressed,
