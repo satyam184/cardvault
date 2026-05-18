@@ -14,8 +14,12 @@ class FolderHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding:
-            EdgeInsets.fromLTRB(horizontalPadding, 30, horizontalPadding, 10),
+        padding: EdgeInsets.fromLTRB(
+          horizontalPadding,
+          30,
+          horizontalPadding,
+          10,
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -53,15 +57,15 @@ class FolderHeader extends StatelessWidget {
               autofocus: true,
               style: const TextStyle(color: Colors.white),
             ),
-            const SizedBox(height: 15),
-            TextField(
-              controller: descController,
-              decoration: const InputDecoration(
-                hintText: 'Description (Optional)',
-                hintStyle: TextStyle(color: Colors.white38),
-              ),
-              style: const TextStyle(color: Colors.white),
-            ),
+            // const SizedBox(height: 15),
+            // TextField(
+            //   controller: descController,
+            //   decoration: const InputDecoration(
+            //     hintText: 'Description (Optional)',
+            //     hintStyle: TextStyle(color: Colors.white38),
+            //   ),
+            //   style: const TextStyle(color: Colors.white),
+            // ),
           ],
         ),
         actions: [
@@ -73,10 +77,7 @@ class FolderHeader extends StatelessWidget {
             onPressed: () {
               if (nameController.text.isNotEmpty) {
                 context.read<DashboardBloc>().add(
-                  CreateFolder(
-                    nameController.text,
-                    description: descController.text,
-                  ),
+                  CreateFolder(nameController.text, description: 'description'),
                 );
               }
               Navigator.pop(dialogContext);
