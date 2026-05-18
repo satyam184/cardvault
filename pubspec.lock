@@ -440,14 +440,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.14.0"
-  groq_sdk:
-    dependency: "direct main"
-    description:
-      name: groq_sdk
-      sha256: "7c0e170d367d321ac24f81ea44789ca0752d6fdcc1003c82c29922ea9bf5f40b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2"
   hooks:
     dependency: transitive
     description:
