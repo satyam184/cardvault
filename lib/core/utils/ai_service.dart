@@ -15,8 +15,7 @@ class AIService {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'HTTP-Referer':
-              'https://cardvault.app', // Required/recommended by OpenRouter
+          'HTTP-Referer': 'https://cardvault.app',
           'X-Title': 'CardVault',
         },
       ),

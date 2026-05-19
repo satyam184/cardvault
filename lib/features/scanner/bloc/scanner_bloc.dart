@@ -1,3 +1,6 @@
+import 'package:cardvault/core/utils/business_card_parser.dart';
+import 'package:cardvault/data/models/ocr_result.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'scanner_event.dart';
 import 'scanner_state.dart';
@@ -9,11 +12,16 @@ import 'package:uuid/uuid.dart';
 class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
   final OCRService _ocrService;
   final AIService _aiService;
+  final BusinessCardParser _parser;
 
-  ScannerBloc({required OCRService ocrService, required AIService aiService})
-    : _ocrService = ocrService,
-      _aiService = aiService,
-      super(ScannerInitial()) {
+  ScannerBloc({
+    required OCRService ocrService,
+    required AIService aiService,
+    required BusinessCardParser parser,
+  }) : _ocrService = ocrService,
+       _aiService = aiService,
+       _parser = parser,
+       super(ScannerInitial()) {
     on<CaptureFront>((event, emit) {
       final currentState = state;
       if (currentState is ScannerCapturing) {
@@ -57,27 +65,44 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
       emit(ScannerAnalyzing("Wait..."));
 
       try {
-        final frontText = await _ocrService.recognizeText(
+        final frontResult = await _ocrService.recognizeText(
           currentState.frontImage!.path,
         );
-        String? backText;
+        OcrResult? backResult;
         if (currentState.backImage != null) {
-          backText = await _ocrService.recognizeText(
+          backResult = await _ocrService.recognizeText(
             currentState.backImage!.path,
           );
         }
 
         emit(ScannerAnalyzing("Almost done..."));
 
-        final parsedData = await _aiService.parseCardText(
-          frontText,
-          backText: backText,
+        final parsedResult = _parser.parse(
+          front: frontResult,
+          back: backResult,
         );
+
+        Map<String, dynamic> parsedData;
+
+        // final parsedData = await _aiService.parseCardText(
+        //   frontText,
+        //   backText: backText,
+        // );
+
+        if (parsedResult.needsAI) {
+          debugPrint('USED AI TO PARSE');
+          parsedData = await _aiService.parseCardText(
+            frontResult.fulltext,
+            backText: backResult?.fulltext ?? '',
+          );
+        } else {
+          parsedData = parsedResult.data;
+        }
 
         final contact = BusinessContact(
           id: const Uuid().v4(),
           name: parsedData['name'] ?? "Unknown",
-          company: parsedData['company'],
+          company: parsedData['company'] ?? "Unknown",
           jobTitle: parsedData['jobTitle'],
           email: parsedData['email'],
           phone: parsedData['phone'],

@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:cardvault/core/utils/business_card_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -72,7 +73,10 @@ class _ScannerScreenState extends State<ScannerScreen> {
     }
   }
 
-  Future<void> _selectFromGallery(BuildContext context, ScannerState state) async {
+  Future<void> _selectFromGallery(
+    BuildContext context,
+    ScannerState state,
+  ) async {
     final bloc = context.read<ScannerBloc>();
     final messenger = ScaffoldMessenger.of(context);
     try {
@@ -103,9 +107,11 @@ class _ScannerScreenState extends State<ScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          ScannerBloc(ocrService: sl<OCRService>(), aiService: sl<AIService>())
-            ..add(ResetScanner()),
+      create: (context) => ScannerBloc(
+        ocrService: sl<OCRService>(),
+        aiService: sl<AIService>(),
+        parser: sl<BusinessCardParser>(),
+      )..add(ResetScanner()),
       child: BlocConsumer<ScannerBloc, ScannerState>(
         listener: (context, state) {
           if (state is ScannerSuccess) {

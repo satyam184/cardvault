@@ -1,3 +1,4 @@
+import '../../core/utils/business_card_parser.dart';
 import '../constants/api_constants.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -31,6 +32,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => OCRService());
   sl.registerLazySingleton(() => AIService());
   sl.registerLazySingleton(() => ExcelService());
+  sl.registerLazySingleton(() => BusinessCardParser());
   sl.registerLazySingleton(() => ConnectivityService());
   sl.registerLazySingleton(
     () => TokenStorageService(const FlutterSecureStorage()),
