@@ -1,5 +1,5 @@
-import 'package:cardvault/core/utils/business_card_parser.dart';
-import 'package:cardvault/data/models/ocr_result.dart';
+import '../../../core/utils/business_card_parser.dart';
+import '../../../data/models/ocr_result.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'scanner_event.dart';
@@ -83,11 +83,6 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
         );
 
         Map<String, dynamic> parsedData;
-
-        // final parsedData = await _aiService.parseCardText(
-        //   frontText,
-        //   backText: backText,
-        // );
 
         if (parsedResult.needsAI) {
           debugPrint('USED AI TO PARSE');
