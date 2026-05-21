@@ -23,7 +23,7 @@ class GroqProvider extends AIProvider {
   }
 
   @override
-  bool get isConfigured => ApiConstants.openRouterApiKey.isNotEmpty;
+  bool get isConfigured => ApiConstants.groqApiKey.isNotEmpty;
 
   @override
   String get name => 'Groq';

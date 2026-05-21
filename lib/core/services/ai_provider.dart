@@ -57,6 +57,6 @@ Return ONLY the JSON object. No markdown, no explanation.
         'Rate limit / quota exhausted. $body',
       );
     }
-    throw Exception('Request failed!');
+    throw Exception('$name request failed [$status]: $body');
   }
 }
