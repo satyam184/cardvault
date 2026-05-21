@@ -1,4 +1,5 @@
 import '../../core/utils/company_detector.dart';
+import '../../core/utils/job_title_detector.dart';
 import '../../core/utils/person_name_detector.dart';
 import '../../data/models/ocr_result.dart';
 
@@ -21,11 +22,12 @@ class BusinessCardParser {
       email,
       websites.firstOrNull,
     );
-    // final jobTitle = JobTitleDetector.
+    final jobTitle = JobTitleDetector.detect(front.blocks, detectedName: name);
 
     final data = ParsedCardData(
       name: name,
       company: company,
+      jobTitle: jobTitle,
       email: email,
       primaryPhone: phones.firstOrNull,
       additionalPhones: phones.skip(1).toList(),
@@ -136,8 +138,9 @@ class BusinessCardParser {
   /// Returns a 0–100 score per field based on format validity + presence.
   Map<String, int> _scoreFields(ParsedCardData data) {
     return {
-      'name': _scoreNullable(data.name, weight: 25),
-      'company': _scoreNullable(data.company, weight: 20),
+      'name': _scoreNullable(data.name, weight: 20),
+      'company': _scoreNullable(data.company, weight: 15),
+      'jobTitle': _scoreNullable(data.jobTitle, weight: 10),
       'email': _scoreEmail(data.email),
       'phone': _scoreNullable(data.primaryPhone, weight: 15),
       'website': _scoreNullable(data.primaryWebsite, weight: 10),
@@ -169,6 +172,7 @@ class BusinessCardParser {
 class ParsedCardData {
   final String? name;
   final String? company;
+  final String? jobTitle;
   final String? email;
   final String? primaryPhone;
   final List<String> additionalPhones;
@@ -180,6 +184,7 @@ class ParsedCardData {
   const ParsedCardData({
     this.name,
     this.company,
+    this.jobTitle,
     this.email,
     this.primaryPhone,
     this.additionalPhones = const [],
@@ -192,6 +197,7 @@ class ParsedCardData {
   Map<String, dynamic> toMap() => {
     'name': name,
     'company': company,
+    'jobTitle': jobTitle,
     'email': email,
     'phone': primaryPhone,
     'additionalPhones': additionalPhones,

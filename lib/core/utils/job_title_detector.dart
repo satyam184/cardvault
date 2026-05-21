@@ -19,8 +19,9 @@ class JobTitleDetector {
 
     for (final block in blocks) {
       // Skip the block that was already claimed as the name
-      if (detectedName != null && block.text.trim() == detectedName.trim())
+      if (detectedName != null && block.text.trim() == detectedName.trim()) {
         continue;
+      }
 
       final score = _scoreTitle(block, pageHeight, maxArea);
       if (score > bestScore) {
@@ -40,10 +41,12 @@ class JobTitleDetector {
 
     // ── Hard disqualifiers ───────────────────────────────────────────────────
     if (text.contains('@')) return double.negativeInfinity;
-    if (text.contains('://') || text.contains('www.'))
+    if (text.contains('://') || text.contains('www.')) {
       return double.negativeInfinity;
-    if (RegExp(r'\d{4,}').hasMatch(text))
-      return double.negativeInfinity; // phone/zip
+    }
+    if (RegExp(r'\d{4,}').hasMatch(text)) {
+      return double.negativeInfinity;
+    } // phone/zip
 
     // ── Primary signal: contains a known title keyword ────────────────────
     if (DetectorUtils.containsTitleKeyword(text)) score += 70;
