@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'package:cardvault/core/exceptions/exceptions.dart';
 import 'package:cardvault/core/services/ai_provider.dart';
 import 'package:cardvault/core/services/provider/groq_provider.dart';
 import 'package:cardvault/core/services/provider/open_router_provider.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import '../constants/api_constants.dart';
 
 // class AIService {
 //   late final Dio _dio;

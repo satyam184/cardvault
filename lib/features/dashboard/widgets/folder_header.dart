@@ -39,7 +39,6 @@ class FolderHeader extends StatelessWidget {
 
   void _showCreateFolderDialog(BuildContext context) {
     final nameController = TextEditingController();
-    final descController = TextEditingController();
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(

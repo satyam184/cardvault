@@ -19,5 +19,5 @@ class OcrBlock {
        area = rect.width * rect.height,
        centerX = rect.center.dx,
        centerY = rect.center.dy,
-       isBold = fontWeight.index >= FontWeight.w600.index;
+       isBold = fontWeight.value >= FontWeight.w600.value;
 }

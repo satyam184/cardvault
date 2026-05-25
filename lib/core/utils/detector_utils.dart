@@ -197,7 +197,7 @@ class DetectorUtils {
     // ── Numeric font weight ──────────────────────────────────────────────────
     // CSS / OpenType convention: 400 = regular, 700 = bold.
     // We treat ≥ 600 as bold (covers semi-bold at 600, bold at 700, black at 900).
-    final weight = block.fontWeight.index;
+    final weight = block.fontWeight.value;
     return weight >= 600;
 
     // ── String font weight ───────────────────────────────────────────────────

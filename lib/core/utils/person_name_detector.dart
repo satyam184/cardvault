@@ -36,16 +36,26 @@ class PersonNameDetector {
     double score = 0;
 
     // ── Hard disqualifiers ───────────────────────────────────────────────────
-    if (text.contains('@')) return double.negativeInfinity;
-    if (text.contains('://') || text.contains('www.'))
+    if (text.contains('@')) {
       return double.negativeInfinity;
-    if (RegExp(r'\d').hasMatch(text))
+    }
+    if (text.contains('://') || text.contains('www.')) {
+      return double.negativeInfinity;
+    }
+    if (RegExp(r'\d').hasMatch(text)) {
       return double.negativeInfinity; // no digits in names
-    if (text.split(RegExp(r'\s+')).length > 5) return -80; // too many words
+    }
+    if (text.split(RegExp(r'\s+')).length > 5) {
+      return -80; // too many words
+    }
 
     // ── Disqualifiers with heavy penalty ─────────────────────────────────────
-    if (DetectorUtils.containsTitleKeyword(text)) score -= 60;
-    if (DetectorUtils.containsCompanySuffix(text)) score -= 60;
+    if (DetectorUtils.containsTitleKeyword(text)) {
+      score -= 60;
+    }
+    if (DetectorUtils.containsCompanySuffix(text)) {
+      score -= 60;
+    }
 
     // ── Positive signals ─────────────────────────────────────────────────────
 

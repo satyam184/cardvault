@@ -61,25 +61,35 @@ class CompanyDetector {
     double score = 0;
 
     // ── Hard disqualifiers ───────────────────────────────────────────────────
-    if (text.contains('@')) return double.negativeInfinity;
-    if (text.contains('://') || text.contains('www.'))
+    if (text.contains('@')) {
       return double.negativeInfinity;
-    if (RegExp(r'\d{5,}').hasMatch(text))
+    }
+    if (text.contains('://') || text.contains('www.')) {
+      return double.negativeInfinity;
+    }
+    if (RegExp(r'\d{5,}').hasMatch(text)) {
       return double.negativeInfinity; // phone/zip
+    }
 
     // ── Strongest signals ────────────────────────────────────────────────────
 
     // Domain match is the most reliable signal available
-    if (emailDomain != null && text.toLowerCase().contains(emailDomain))
+    if (emailDomain != null && text.toLowerCase().contains(emailDomain)) {
       score += 80;
-    if (websiteDomain != null && text.toLowerCase().contains(websiteDomain))
+    }
+    if (websiteDomain != null && text.toLowerCase().contains(websiteDomain)) {
       score += 80;
+    }
 
     // Legal company suffix
-    if (DetectorUtils.containsCompanySuffix(text)) score += 60;
+    if (DetectorUtils.containsCompanySuffix(text)) {
+      score += 60;
+    }
 
     // ── Title keyword penalty ────────────────────────────────────────────────
-    if (DetectorUtils.containsTitleKeyword(text)) score -= 60;
+    if (DetectorUtils.containsTitleKeyword(text)) {
+      score -= 60;
+    }
 
     // ── Casing: ALL CAPS is very common for company names on cards ────────
     if (text == text.toUpperCase()) score += 25;
