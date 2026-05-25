@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/common_widgets/glass_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../bloc/dashboard_bloc.dart';
@@ -32,7 +31,7 @@ class FolderGrid extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(LucideIcons.alertCircle,
+                  const Icon(Icons.error_outline,
                       color: Colors.redAccent, size: 48),
                   const SizedBox(height: 16),
                   const Text('Something went wrong',
@@ -83,7 +82,7 @@ class FolderGrid extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
-                              LucideIcons.arrowRight,
+                              Icons.arrow_forward,
                               color: AppColors.primary,
                               size: 24,
                             ),
@@ -124,12 +123,12 @@ class FolderGrid extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Icon(
-                              LucideIcons.folder,
+                              Icons.folder_outlined,
                               color: AppColors.primary,
                               size: 30,
                             ),
                             PopupMenuButton<String>(
-                              icon: const Icon(LucideIcons.moreVertical, color: Colors.white70, size: 20),
+                              icon: const Icon(Icons.more_vert, color: Colors.white70, size: 20),
                               padding: EdgeInsets.zero,
                               onSelected: (value) {
                                 if (value == 'edit') {

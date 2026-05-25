@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../theme/app_colors.dart';
 import '../utils/injection.dart';
@@ -59,7 +58,7 @@ class ConnectivityWrapper extends StatelessWidget {
                           ],
                         ),
                         child: const Icon(
-                          LucideIcons.wifiOff,
+                          Icons.wifi_off,
                           size: 64,
                           color: AppColors.error,
                         ),
@@ -108,7 +107,7 @@ class ConnectivityWrapper extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(
-                                LucideIcons.refreshCw,
+                                Icons.refresh,
                                 color: Colors.white,
                                 size: 20,
                               ).animate(onPlay: (controller) => controller.repeat())

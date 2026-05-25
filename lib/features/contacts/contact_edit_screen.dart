@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/common_widgets/glass_card.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/injection.dart';
@@ -112,7 +111,7 @@ class _ContactEditScreenState extends State<ContactEditScreen> {
                 );
               }
               return IconButton(
-                icon: const Icon(LucideIcons.save, color: AppColors.primary),
+                icon: const Icon(Icons.save_outlined, color: AppColors.primary),
                 onPressed: _saveContact,
               );
             },
@@ -139,64 +138,64 @@ class _ContactEditScreenState extends State<ContactEditScreen> {
             key: _formKey,
             child: Column(
               children: [
-                _buildSectionHeader('Basic Information', LucideIcons.user),
+                _buildSectionHeader('Basic Information', Icons.person_outline),
                 const SizedBox(height: 15),
                 _buildResponsiveGrid([
                   _buildTextField(
                     _controllers['name']!,
                     'Full Name',
-                    LucideIcons.user,
+                    Icons.person_outline,
                     required: true,
                   ),
                   _buildTextField(
                     _controllers['company']!,
                     'Company',
-                    LucideIcons.building,
+                    Icons.business_outlined,
                   ),
                   _buildTextField(
                     _controllers['jobTitle']!,
                     'Job Title',
-                    LucideIcons.briefcase,
+                    Icons.work_outline,
                   ),
                 ], isTablet),
 
                 const SizedBox(height: 30),
-                _buildSectionHeader('Card Details', LucideIcons.phone),
+                _buildSectionHeader('Card Details', Icons.phone),
                 const SizedBox(height: 15),
                 _buildResponsiveGrid([
                   _buildTextField(
                     _controllers['email']!,
                     'Email',
-                    LucideIcons.mail,
+                    Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
                   ),
                   _buildTextField(
                     _controllers['phone']!,
                     'Phone',
-                    LucideIcons.phone,
+                    Icons.phone,
                     keyboardType: TextInputType.phone,
                   ),
                   _buildTextField(
                     _controllers['website']!,
                     'Website',
-                    LucideIcons.globe,
+                    Icons.public,
                   ),
                 ], isTablet),
 
                 const SizedBox(height: 30),
-                _buildSectionHeader('Additional Info', LucideIcons.mapPin),
+                _buildSectionHeader('Additional Info', Icons.location_on_outlined),
                 const SizedBox(height: 15),
                 _buildTextField(
                   _controllers['address']!,
                   'Address',
-                  LucideIcons.mapPin,
+                  Icons.location_on_outlined,
                   maxLines: 2,
                 ),
                 const SizedBox(height: 15),
                 _buildTextField(
                   _controllers['notes']!,
                   'Notes',
-                  LucideIcons.fileText,
+                  Icons.description_outlined,
                   maxLines: 4,
                 ),
 

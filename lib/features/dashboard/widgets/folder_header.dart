@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_colors.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
@@ -26,7 +25,7 @@ class FolderHeader extends StatelessWidget {
             Text('My Folders', style: Theme.of(context).textTheme.titleLarge),
             IconButton(
               icon: const Icon(
-                LucideIcons.plusCircle,
+                Icons.add_circle_outline,
                 color: AppColors.primary,
               ),
               onPressed: () => _showCreateFolderDialog(context),

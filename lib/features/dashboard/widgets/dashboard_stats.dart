@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/common_widgets/glass_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../bloc/dashboard_bloc.dart';
@@ -28,7 +27,7 @@ class DashboardStats extends StatelessWidget {
                   _StatItem(
                     value: total.toString(),
                     label: 'Total Cards',
-                    icon: LucideIcons.creditCard,
+                    icon: Icons.credit_card,
                   ),
                   const VerticalDivider(
                     color: Colors.white10,
@@ -38,7 +37,7 @@ class DashboardStats extends StatelessWidget {
                   const _StatItem(
                     value: 'Today',
                     label: 'Scan more',
-                    icon: LucideIcons.trendingUp,
+                    icon: Icons.trending_up,
                   ),
                 ],
               ),

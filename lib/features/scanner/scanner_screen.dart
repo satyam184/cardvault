@@ -3,7 +3,6 @@ import 'package:cardvault/core/utils/business_card_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'bloc/scanner_bloc.dart';
 import 'bloc/scanner_event.dart';
@@ -201,7 +200,7 @@ class ScannerUIOverlay extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: const Icon(LucideIcons.x, color: Colors.white),
+                  icon: const Icon(Icons.close, color: Colors.white),
                   onPressed: onClosePressed,
                 ),
                 Container(
@@ -322,7 +321,7 @@ class ScannerControls extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(
-                  LucideIcons.image,
+                  Icons.image_outlined,
                   color: Colors.white,
                   size: 30,
                 ),
@@ -352,7 +351,7 @@ class ScannerControls extends StatelessWidget {
               if (isFrontCaptured)
                 IconButton(
                   icon: const Icon(
-                    LucideIcons.check,
+                    Icons.check,
                     color: AppColors.primary,
                     size: 30,
                   ),
@@ -395,7 +394,7 @@ class ThumbnailPreview extends StatelessWidget {
             ),
           ),
           child: Icon(
-            isCaptured ? LucideIcons.check : LucideIcons.camera,
+            isCaptured ? Icons.check : Icons.camera_alt_outlined,
             color: isCaptured ? Colors.white : Colors.white24,
             size: 20,
           ),

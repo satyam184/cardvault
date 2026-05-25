@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
 import '../auth/bloc/auth_bloc.dart';
 
@@ -92,7 +91,7 @@ class _SplashScreenState extends State<SplashScreen> {
                           ],
                         ),
                         child: Icon(
-                          LucideIcons.wallet,
+                          Icons.account_balance_wallet_outlined,
                           size: logoSize,
                           color: AppColors.primary,
                         ),

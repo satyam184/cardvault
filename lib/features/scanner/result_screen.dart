@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../data/models/contact_model.dart';
 import '../../data/models/folder_model.dart';
@@ -193,7 +192,7 @@ class _ResultScreenState extends State<ResultScreen> {
                   value: selectedFolderId,
                   isExpanded: true,
                   dropdownColor: AppColors.surface,
-                  icon: const Icon(LucideIcons.chevronDown, color: AppColors.primary),
+                  icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
                   items: folders
                       .map(
                         (f) => DropdownMenuItem(
@@ -278,13 +277,13 @@ class _ResultScreenState extends State<ResultScreen> {
 
   Widget _buildForm(bool isWide) {
     final fields = [
-      _buildField(LucideIcons.user, 'Full Name', _model.name),
-      _buildField(LucideIcons.briefcase, 'Company', _model.company),
-      _buildField(LucideIcons.award, 'Job Title', _model.jobTitle),
-      _buildField(LucideIcons.mail, 'Email Address', _model.email),
-      _buildField(LucideIcons.phone, 'Phone Number', _model.phone),
-      _buildField(LucideIcons.globe, 'Website', _model.website),
-      _buildField(LucideIcons.mapPin, 'Address', _model.address),
+      _buildField(Icons.person_outline, 'Full Name', _model.name),
+      _buildField(Icons.work_outline, 'Company', _model.company),
+      _buildField(Icons.emoji_events_outlined, 'Job Title', _model.jobTitle),
+      _buildField(Icons.email_outlined, 'Email Address', _model.email),
+      _buildField(Icons.phone, 'Phone Number', _model.phone),
+      _buildField(Icons.public, 'Website', _model.website),
+      _buildField(Icons.location_on_outlined, 'Address', _model.address),
     ];
 
     if (!isWide) {

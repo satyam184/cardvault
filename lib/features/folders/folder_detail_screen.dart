@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/common_widgets/glass_card.dart';
@@ -70,7 +69,7 @@ class _FolderDetailScreenState extends State<FolderDetailScreen> {
                       );
                     }
                     return IconButton(
-                      icon: const Icon(LucideIcons.download),
+                      icon: const Icon(Icons.download_outlined),
                       onPressed: state is FolderLoaded
                           ? () => _exportFolder(context, widget.folder.id)
                           : null,
@@ -206,7 +205,7 @@ class _SearchBarState extends State<_SearchBar> {
               onChanged: _onSearchChanged,
               decoration: const InputDecoration(
                 icon: Icon(
-                  LucideIcons.search,
+                  Icons.search,
                   color: AppColors.textSecondary,
                   size: 20,
                 ),
@@ -331,7 +330,7 @@ class _ContactListState extends State<_ContactList> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
-                  LucideIcons.alertCircle,
+                  Icons.error_outline,
                   color: Colors.redAccent,
                   size: 48,
                 ),
@@ -358,7 +357,7 @@ class _ContactListState extends State<_ContactList> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(
-                    LucideIcons.userX,
+                    Icons.person_off_outlined,
                     size: 60,
                     color: AppColors.textMuted,
                   ),
@@ -437,7 +436,7 @@ class _ContactListState extends State<_ContactList> {
                                 children: [
                                   IconButton(
                                     icon: const Icon(
-                                      LucideIcons.trash2,
+                                      Icons.delete_outline,
                                       color: Colors.redAccent,
                                       size: 20,
                                     ),
@@ -445,7 +444,7 @@ class _ContactListState extends State<_ContactList> {
                                         _deleteContact(context, contact),
                                   ),
                                   const Icon(
-                                    LucideIcons.chevronRight,
+                                    Icons.chevron_right,
                                     color: AppColors.textMuted,
                                   ),
                                 ],

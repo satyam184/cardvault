@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/common_widgets/glass_card.dart';
 import '../../core/theme/app_colors.dart';
@@ -139,7 +138,7 @@ class _FoldersListScreenState extends State<FoldersListScreen> {
                               child: Row(
                                 children: [
                                   const Icon(
-                                    LucideIcons.folder,
+                                    Icons.folder_outlined,
                                     color: AppColors.primary,
                                     size: 32,
                                   ),
@@ -191,7 +190,7 @@ class _FoldersListScreenState extends State<FoldersListScreen> {
                                     ],
                                   ),
                                   PopupMenuButton<String>(
-                                    icon: const Icon(LucideIcons.moreVertical, color: Colors.white70),
+                                    icon: const Icon(Icons.more_vert, color: Colors.white70),
                                     onSelected: (value) {
                                       if (value == 'edit') {
                                         _showEditFolderDialog(context, folder);

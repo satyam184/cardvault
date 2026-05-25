@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/common_widgets/glass_card.dart';
@@ -174,7 +173,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         children: [
                           const SizedBox(height: 20),
                           const Icon(
-                            LucideIcons.creditCard,
+                            Icons.credit_card,
                             color: AppColors.primary,
                             size: 60,
                           ).animate().fadeIn().scale(),
@@ -353,20 +352,20 @@ class _AuthForm extends StatelessWidget {
             if (!isLogin)
               _CustomTextField(
                 controller: nameController,
-                icon: LucideIcons.user,
+                icon: Icons.person_outline,
                 label: 'Full Name',
               ).animate().fadeIn().slideY(begin: 0.1),
             const SizedBox(height: 20),
             _CustomTextField(
               controller: emailController,
-              icon: LucideIcons.mail,
+              icon: Icons.email_outlined,
               label: 'Email Address',
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 20),
             _CustomTextField(
               controller: passwordController,
-              icon: LucideIcons.lock,
+              icon: Icons.lock_outline,
               label: 'Password',
               isPassword: true,
             ),
@@ -503,9 +502,9 @@ class _SocialLoginSection extends StatelessWidget {
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _SocialButton(icon: LucideIcons.chrome),
+            _SocialButton(icon: Icons.language),
             SizedBox(width: 20),
-            _SocialButton(icon: LucideIcons.apple),
+            _SocialButton(icon: Icons.phone_iphone),
           ],
         ),
       ],
