@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: "17"
@@ -25,28 +25,11 @@ jobs:
         with:
           flutter-version: "3.44.0"
 
+      - name: Create .env
+        run: touch .env
+
       - name: Install Dependencies
         run: flutter pub get
-
-      - name: Install Shorebird
-        run: |
-          curl --proto '=https' --tlsv1.2 -LsSf https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
-
-      - name: Login Shorebird
-        run: |
-          export PATH="$HOME/.shorebird/bin:$PATH"
-
-          shorebird login --token=${{ secrets.SHOREBIRD_TOKEN }}
-
-      - name: Build Shorebird APK
-        run: |
-          export PATH="$HOME/.shorebird/bin:$PATH"
-
-          shorebird release android --artifact apk --force
-
-      - name: Create .env
-        run: |
-          touch .env
 
       - name: Analyze Project
         run: flutter analyze
@@ -54,8 +37,16 @@ jobs:
       - name: Run Tests
         run: flutter test
 
+      - name: Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          flutter-version: "3.44.0"
+
+      - name: Shorebird Login
+        run: shorebird login --token=${{ secrets.SHOREBIRD_TOKEN }}
+
       - name: Build Shorebird APK
-        run: shorebird release android --artifact apk
+        run: shorebird release android --artifact apk --force
 
       - name: Upload to Loadly
         run: |

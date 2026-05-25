@@ -24,7 +24,7 @@ class DashboardAppBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'testing2,',
+                  'testing3,',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Text(
