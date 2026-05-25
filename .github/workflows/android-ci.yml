@@ -28,6 +28,10 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Create .env
+        run: |
+          touch .env
+
       - name: Analyze Project
         run: flutter analyze
 
