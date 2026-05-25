@@ -1,0 +1,41 @@
+name: Shorebird Patch
+
+on:
+  push:
+    branches:
+      - hotfix/**
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.0"
+
+      - name: Create .env
+        run: touch .env
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          flutter-version: "3.44.0"
+
+      - name: Create Shorebird Patch
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        run: shorebird patch android --force
