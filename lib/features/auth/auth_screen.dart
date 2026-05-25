@@ -56,7 +56,9 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _showForgotPasswordDialog(BuildContext context) {
-    final emailResetController = TextEditingController(text: _emailController.text);
+    final emailResetController = TextEditingController(
+      text: _emailController.text,
+    );
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -101,12 +103,17 @@ class _AuthScreenState extends State<AuthScreen> {
               Navigator.pop(dialogContext);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Password reset link sent to ${emailResetController.text}'),
+                  content: Text(
+                    'Password reset link sent to ${emailResetController.text}',
+                  ),
                   backgroundColor: AppColors.secondary,
                 ),
               );
             },
-            child: const Text('Reset', style: TextStyle(color: AppColors.primary)),
+            child: const Text(
+              'Reset',
+              style: TextStyle(color: AppColors.primary),
+            ),
           ),
         ],
       ),
@@ -157,17 +164,20 @@ class _AuthScreenState extends State<AuthScreen> {
                 SafeArea(
                   child: Center(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 20,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 20),
-                          const Icon(LucideIcons.creditCard,
-                                  color: AppColors.primary, size: 60)
-                              .animate()
-                              .fadeIn()
-                              .scale(),
+                          const Icon(
+                            LucideIcons.creditCard,
+                            color: AppColors.primary,
+                            size: 60,
+                          ).animate().fadeIn().scale(),
                           const SizedBox(height: 20),
                           ValueListenableBuilder<bool>(
                             valueListenable: _isLogin,
@@ -176,16 +186,28 @@ class _AuthScreenState extends State<AuthScreen> {
                                 valueListenable: _rememberMe,
                                 builder: (context, rememberMe, _) {
                                   return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        isLogin ? 'Welcome Back' : 'Create Account',
-                                        style: Theme.of(context).textTheme.displayLarge,
-                                      ).animate().fadeIn(delay: 200.ms).slideX(),
+                                            isLogin
+                                                ? 'Welcome Back'
+                                                : 'Create Account',
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.displayLarge,
+                                          )
+                                          .animate()
+                                          .fadeIn(delay: 200.ms)
+                                          .slideX(),
                                       const SizedBox(height: 8),
                                       Text(
-                                        isLogin ? 'Sign in to continue' : 'Join CardVault today',
-                                        style: Theme.of(context).textTheme.bodyMedium,
+                                        isLogin
+                                            ? 'Sign in to continue'
+                                            : 'Join CardVault today',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyMedium,
                                       ).animate().fadeIn(delay: 300.ms),
                                       const SizedBox(height: 40),
                                       _AuthForm(
@@ -194,35 +216,44 @@ class _AuthScreenState extends State<AuthScreen> {
                                         onRememberMeChanged: (val) {
                                           _rememberMe.value = val ?? false;
                                         },
-                                        onForgotPassword: () => _showForgotPasswordDialog(context),
+                                        onForgotPassword: () =>
+                                            _showForgotPasswordDialog(context),
                                         emailController: _emailController,
                                         passwordController: _passwordController,
                                         nameController: _nameController,
                                         onSubmitted: () {
-                                          final bloc = context.read<LoginBloc>();
+                                          final bloc = context
+                                              .read<LoginBloc>();
                                           if (isLogin) {
-                                            bloc.add(LoginSubmitted(
-                                              _emailController.text,
-                                              _passwordController.text,
-                                            ));
+                                            bloc.add(
+                                              LoginSubmitted(
+                                                _emailController.text,
+                                                _passwordController.text,
+                                              ),
+                                            );
                                           } else {
-                                            bloc.add(RegisterSubmitted(
-                                              _nameController.text,
-                                              _emailController.text,
-                                              _passwordController.text,
-                                            ));
+                                            bloc.add(
+                                              RegisterSubmitted(
+                                                _nameController.text,
+                                                _emailController.text,
+                                                _passwordController.text,
+                                              ),
+                                            );
                                           }
                                         },
                                       ),
                                       const SizedBox(height: 30),
                                       Center(
                                         child: TextButton(
-                                          onPressed: () => _isLogin.value = !isLogin,
+                                          onPressed: () =>
+                                              _isLogin.value = !isLogin,
                                           child: Text(
                                             isLogin
                                                 ? "Don't have an account? Sign Up"
                                                 : "Already have an account? Login",
-                                            style: const TextStyle(color: AppColors.textSecondary),
+                                            style: const TextStyle(
+                                              color: AppColors.textSecondary,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -359,7 +390,10 @@ class _AuthForm extends StatelessWidget {
                       const SizedBox(width: 8),
                       const Text(
                         'Remember me',
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),
@@ -367,7 +401,11 @@ class _AuthForm extends StatelessWidget {
                     onPressed: onForgotPassword,
                     child: const Text(
                       'Forgot Password?',
-                      style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -378,12 +416,15 @@ class _AuthForm extends StatelessWidget {
               width: double.infinity,
               height: 60,
               child: ElevatedButton(
-                onPressed: state.status == LoginStatus.loading ? null : onSubmitted,
+                onPressed: state.status == LoginStatus.loading
+                    ? null
+                    : onSubmitted,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   elevation: 0,
                 ),
                 child: state.status == LoginStatus.loading
@@ -391,7 +432,9 @@ class _AuthForm extends StatelessWidget {
                     : Text(
                         isLogin ? 'Login' : 'Sign Up',
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
               ),
             ).animate().fadeIn(delay: 400.ms).scale(),
