@@ -30,13 +30,19 @@ jobs:
 
       - name: Install Shorebird
         run: |
-          curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh -sSf | bash
-
-      - name: Add Shorebird to PATH
-        run: echo "$HOME/.shorebird/bin" >> $GITHUB_PATH
+          curl --proto '=https' --tlsv1.2 -LsSf https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
 
       - name: Login Shorebird
-        run: shorebird login --token=${{ secrets.SHOREBIRD_TOKEN }}
+        run: |
+          export PATH="$HOME/.shorebird/bin:$PATH"
+
+          shorebird login --token=${{ secrets.SHOREBIRD_TOKEN }}
+
+      - name: Build Shorebird APK
+        run: |
+          export PATH="$HOME/.shorebird/bin:$PATH"
+
+          shorebird release android --artifact apk --force
 
       - name: Create .env
         run: |
