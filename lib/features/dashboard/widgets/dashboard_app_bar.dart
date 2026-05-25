@@ -39,7 +39,10 @@ class DashboardAppBar extends StatelessWidget {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.notifications_none, color: Colors.white70),
+                  icon: const Icon(
+                    Icons.notifications_none,
+                    color: Colors.white70,
+                  ),
                   onPressed: () {},
                 ),
               ],
