@@ -1,0 +1,46 @@
+name: Flutter Android CI
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.32.0"
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Analyze Project
+        run: flutter analyze
+
+      - name: Run Tests
+        run: flutter test
+
+      - name: Build APK
+        run: flutter build apk --obfuscate --split-debug-info=./build/symbols
+
+      - name: Upload to Loadly
+        run: |
+          curl -X POST \
+          "https://api.loadly.io/apiv2/app/upload" \
+          -F "_api_key=${{ secrets.LOADLY_API_KEY }}" \
+          -F "file=@build/app/outputs/flutter-apk/app-release.apk" \
+          -F "release_notes=New automated build from GitHub Actions"
