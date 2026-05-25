@@ -42,10 +42,9 @@ jobs:
         with:
           flutter-version: "3.44.0"
 
-      - name: Shorebird Login
-        run: shorebird login --token=${{ secrets.SHOREBIRD_TOKEN }}
-
       - name: Build Shorebird APK
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: shorebird release android --artifact apk --force
 
       - name: Upload to Loadly
