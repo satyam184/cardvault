@@ -29,7 +29,7 @@ class DashboardStats extends StatelessWidget {
                 children: [
                   _StatItem(
                     value: total.toString(),
-                    label: 'Cards',
+                    label: 'Totallll Cards',
                     icon: Icons.credit_card,
                   ),
                   const VerticalDivider(
