@@ -38,4 +38,4 @@ jobs:
       - name: Create Shorebird Patch
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        run: shorebird patch android
+        run: shorebird patch android --release-version 1.0.1+1
