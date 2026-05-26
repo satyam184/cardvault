@@ -18,7 +18,10 @@ class DashboardStats extends StatelessWidget {
         builder: (context, state) {
           final total = state is DashboardLoaded ? state.totalCards : 0;
           return Padding(
-            padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 10),
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: 10,
+            ),
             child: GlassCard(
               padding: const EdgeInsets.all(20),
               child: Row(
@@ -26,7 +29,7 @@ class DashboardStats extends StatelessWidget {
                 children: [
                   _StatItem(
                     value: total.toString(),
-                    label: 'Total Cards',
+                    label: 'Cards',
                     icon: Icons.credit_card,
                   ),
                   const VerticalDivider(
@@ -74,7 +77,10 @@ class _StatItem extends StatelessWidget {
               children: [
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
