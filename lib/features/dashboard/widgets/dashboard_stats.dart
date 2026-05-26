@@ -39,7 +39,7 @@ class DashboardStats extends StatelessWidget {
                   ),
                   const _StatItem(
                     value: 'Today',
-                    label: 'Scan more',
+                    label: 'Scan more..',
                     icon: Icons.trending_up,
                   ),
                 ],

@@ -23,7 +23,7 @@ class DashboardAppBar extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Hello1', style: Theme.of(context).textTheme.bodyMedium),
+                Text('Hello', style: Theme.of(context).textTheme.bodyMedium),
                 Text(
                   'CardVault',
                   style: Theme.of(context).textTheme.displayLarge,
