@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../core/theme/app_colors.dart';
 import '../auth/bloc/auth_bloc.dart';
 
@@ -141,14 +142,20 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
 
               // Version Indicator
-              Positioned(
-                bottom: 40,
-                child: Text(
-                  'v1.0.0',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(color: AppColors.textMuted),
-                ).animate().fadeIn(delay: 1500.ms),
+              FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, asyncSnapshot) {
+                  final version = asyncSnapshot.data?.version ?? '0.0.0';
+                  return Positioned(
+                    bottom: 40,
+                    child: Text(
+                      'v $version',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.textMuted,
+                      ),
+                    ).animate().fadeIn(delay: 1500.ms),
+                  );
+                },
               ),
             ],
           ),
