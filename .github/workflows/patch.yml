@@ -32,8 +32,6 @@ jobs:
 
       - name: Setup Shorebird
         uses: shorebirdtech/setup-shorebird@v1
-        with:
-          flutter-version: "3.44.0"
 
       - name: Create Shorebird Patch
         env:
