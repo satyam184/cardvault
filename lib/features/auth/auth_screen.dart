@@ -444,7 +444,7 @@ class _AuthForm extends StatelessWidget {
   }
 }
 
-class _CustomTextField extends StatelessWidget {
+class _CustomTextField extends StatefulWidget {
   final TextEditingController controller;
   final IconData icon;
   final String label;
@@ -460,19 +460,46 @@ class _CustomTextField extends StatelessWidget {
   });
 
   @override
+  State<_CustomTextField> createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<_CustomTextField> {
+  late bool _obscureText;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscureText = widget.isPassword;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GlassCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: TextField(
-        controller: controller,
-        obscureText: isPassword,
-        keyboardType: keyboardType,
+        controller: widget.controller,
+        obscureText: _obscureText,
+        keyboardType: widget.keyboardType,
         decoration: InputDecoration(
-          icon: Icon(icon, color: AppColors.primary, size: 20),
-          labelText: label,
+          icon: Icon(widget.icon, color: AppColors.primary, size: 20),
+          labelText: widget.label,
           labelStyle: const TextStyle(color: AppColors.textSecondary),
           border: InputBorder.none,
           focusedBorder: InputBorder.none,
+          suffixIcon: widget.isPassword
+              ? IconButton(
+                  icon: Icon(
+                    _obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                )
+              : null,
         ),
         style: const TextStyle(color: AppColors.textPrimary),
       ),
