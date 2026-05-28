@@ -45,6 +45,9 @@ jobs:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: shorebird release android --artifact apk
 
+      - name: Show APKs
+        run: find build -name "*.apk"
+
       - name: Upload to Loadly
         run: |
           curl -X POST \
