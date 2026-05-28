@@ -10,18 +10,15 @@ import '../../../data/models/contact_model.dart';
 import 'package:uuid/uuid.dart';
 
 class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
-  final OCRService _ocrService;
-  final AIService _aiService;
-  final BusinessCardParser _parser;
+  final OCRService ocrService;
+  final AIService aiService;
+  final BusinessCardParser parser;
 
   ScannerBloc({
-    required OCRService ocrService,
-    required AIService aiService,
-    required BusinessCardParser parser,
-  }) : _ocrService = ocrService,
-       _aiService = aiService,
-       _parser = parser,
-       super(ScannerInitial()) {
+    required this.ocrService,
+    required this.aiService,
+    required this.parser,
+  }) : super(ScannerInitial()) {
     on<CaptureFront>((event, emit) {
       final currentState = state;
       if (currentState is ScannerCapturing) {
@@ -65,19 +62,19 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
       emit(ScannerAnalyzing("Wait..."));
 
       try {
-        final frontResult = await _ocrService.recognizeText(
+        final frontResult = await ocrService.recognizeText(
           currentState.frontImage!.path,
         );
         OcrResult? backResult;
         if (currentState.backImage != null) {
-          backResult = await _ocrService.recognizeText(
+          backResult = await ocrService.recognizeText(
             currentState.backImage!.path,
           );
         }
 
         emit(ScannerAnalyzing("Almost done..."));
 
-        final parsedResult = _parser.parse(
+        final parsedResult = parser.parse(
           front: frontResult,
           back: backResult,
         );
@@ -86,7 +83,7 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
 
         if (parsedResult.needsAI) {
           debugPrint('USED AI TO PARSE');
-          parsedData = await _aiService.parseCardText(
+          parsedData = await aiService.parseCardText(
             frontResult.fulltext,
             backText: backResult?.fulltext ?? '',
           );

@@ -5,12 +5,11 @@ import 'folder_state.dart';
 import '../../../data/repositories/contact_repository.dart';
 
 class FolderBloc extends Bloc<FolderEvent, FolderState> {
-  final ContactRepository _repository;
+  final ContactRepository repository;
   static const int _limit = 15;
 
-  FolderBloc({required ContactRepository repository})
-    : _repository = repository,
-      super(FolderInitial()) {
+  FolderBloc({required this.repository})
+    : super(FolderInitial()) {
     on<LoadFolderContacts>(_onLoadFolderContacts);
     on<LoadMoreContacts>(_onLoadMoreContacts);
     on<SearchContacts>(_onSearchContacts);
@@ -22,7 +21,7 @@ class FolderBloc extends Bloc<FolderEvent, FolderState> {
   ) async {
     emit(FolderLoading());
     try {
-      final contacts = await _repository.getContacts(
+      final contacts = await repository.getContacts(
         page: 1,
         limit: _limit,
         folderId: event.folderId,
@@ -50,7 +49,7 @@ class FolderBloc extends Bloc<FolderEvent, FolderState> {
     if (currentState is FolderLoaded && !currentState.hasReachedMax) {
       try {
         final nextPage = currentState.currentPage + 1;
-        final newContacts = await _repository.getContacts(
+        final newContacts = await repository.getContacts(
           page: nextPage,
           limit: _limit,
           folderId: currentState.folderId,
@@ -82,7 +81,7 @@ class FolderBloc extends Bloc<FolderEvent, FolderState> {
       // Show loading while searching
       emit(FolderLoading());
       try {
-        final searchResults = await _repository.getContacts(
+        final searchResults = await repository.getContacts(
           page: 1,
           limit: _limit,
           folderId: currentState.folderId,

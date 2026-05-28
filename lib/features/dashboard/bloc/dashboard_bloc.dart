@@ -6,11 +6,10 @@ import 'dashboard_state.dart';
 import '../../../data/repositories/contact_repository.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
-  final ContactRepository _repository;
+  final ContactRepository repository;
 
-  DashboardBloc({required ContactRepository repository})
-    : _repository = repository,
-      super(DashboardInitial()) {
+  DashboardBloc({required this.repository})
+    : super(DashboardInitial()) {
     on<LoadDashboard>(_onLoadDashboard);
     on<CreateFolder>(_onCreateFolder);
     on<UpdateFolder>(_onUpdateFolder);
@@ -24,8 +23,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     emit(DashboardLoading());
     try {
       final results = await Future.wait([
-        _repository.getFolders(limit: 3),
-        _repository.getContactStats(),
+        repository.getFolders(limit: 3),
+        repository.getContactStats(),
       ]);
 
       final folders = results[0] as List<ContactFolder>;
@@ -52,7 +51,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     Emitter<DashboardState> emit,
   ) async {
     try {
-      await _repository.createFolder(
+      await repository.createFolder(
         event.name,
         description: event.description,
       );
@@ -67,7 +66,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     Emitter<DashboardState> emit,
   ) async {
     try {
-      await _repository.updateFolder(
+      await repository.updateFolder(
         event.folderId,
         event.name,
         description: event.description,
@@ -83,7 +82,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     Emitter<DashboardState> emit,
   ) async {
     try {
-      await _repository.deleteFolder(event.folderId);
+      await repository.deleteFolder(event.folderId);
       add(LoadDashboard());
     } catch (e) {
       emit(DashboardError('Failed to delete folder: ${e.toString()}'));
